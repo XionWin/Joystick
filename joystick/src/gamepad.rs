@@ -55,13 +55,32 @@ impl Gamepad {
     fn init(&mut self, path: &str) {
         let open_mode = OpenMode::read() | OpenMode::write() | OpenMode::nonblock();
         let file = JsFile::new(path).open(open_mode);
+        let axis_count = file.read_axis_count().unwrap();
+        let button_count = file.read_button_count().unwrap();
+
+
+        let axes: Vec<Axis> = file
+            .read_axis_mapping(axis_count as usize)
+            .unwrap()
+            .iter()
+            .enumerate()
+            .map(|(i, item)| Axis::parse(i as u8, item))
+            .collect();
+
+        let buttons: Vec<Button> = file
+            .read_button_mapping(button_count as usize)
+            .unwrap()
+            .iter()
+            .enumerate()
+            .map(|(i, item)| Button::parse(i as u8, item))
+            .collect();
 
         self.path = String::from(path);
         self.open_mode = open_mode;
         self.version = file.read_driver_version().unwrap();
         self.name = file.read_name().unwrap();
-        self.axes = Vec::<Axis>::new();
-        self.buttons = Vec::<Button>::new();
+        self.axes = axes;
+        self.buttons = buttons;
         self.file = Some(file);
 
         self.disconnect();
@@ -83,3 +102,11 @@ impl Gamepad {
         &(self.buttons)
     }
 }
+
+#[macro_export]
+macro_rules! listen {
+    () => {
+        
+    };
+}
+

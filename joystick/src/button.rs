@@ -1,3 +1,5 @@
+use joystick_core as jsc;
+
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Button {
@@ -12,6 +14,16 @@ impl Clone for Button {
             id: self.id,
             alias: self.alias.clone(),
             value: self.value
+        }
+    }
+}
+
+impl Button {
+    pub fn parse(id: u8, key: &jsc::key::Key) -> Self {
+        Self {
+            id,
+            alias: key.to_string(),
+            value: 0
         }
     }
 }

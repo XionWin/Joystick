@@ -137,6 +137,13 @@ impl Default for Axis {
 	}
 }
 
+impl std::fmt::Display for Axis {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+
 // impl EventCode<u8> for Axis {
 // 	const COUNT: u8 = ABS_CNT as u8;
 // 	const MAX: u8 = ABS_MAX as u8;

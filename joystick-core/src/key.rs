@@ -1628,6 +1628,12 @@ impl Default for Key {
 	}
 }
 
+impl std::fmt::Display for Key {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 // impl EventCode<u16> for Key {
 // 	const COUNT: u16 = KEY_CNT;
 // 	const MAX: u16 = KEY_MAX;
