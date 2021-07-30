@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "app",
+    "joystick",
+    "joystick-core",
+]
