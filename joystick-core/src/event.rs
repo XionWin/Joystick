@@ -17,7 +17,6 @@ impl Default for Event {
 	}
 }
 
-#[allow(dead_code)]
 #[repr(u8)]
 pub enum EventType {
     EventButton = 0x01,    /* button pressed/released */

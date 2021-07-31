@@ -1,7 +1,3 @@
-use std::ops::IndexMut;
-
-use crate::control::Control;
-
 use super::{axis::Axis, button::Button, utils};
 use joystick_core as jsc;
 use jsc::{JsFile, OpenMode};
@@ -85,11 +81,9 @@ impl Gamepad {
         self.axes = axes;
         self.buttons = buttons;
 
-        utils::update_init(self, file.read_init_event_with_no_block());
+        utils::update_with_init_events(self, file.read_init_event_with_no_block());
 
         self.file = Some(file);
-
-
         self.disconnect();
     }
 
@@ -107,13 +101,6 @@ impl Gamepad {
 
     pub fn get_buttons(&self) -> &Vec<Button> {
         &(self.buttons)
-    }
-
-
-
-    pub fn update_button(&mut self, index: usize) {
-        let r = self.buttons.index_mut(index);
-        r.set_value(10);
     }
 
 
