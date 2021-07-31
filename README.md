@@ -1,2 +1,2 @@
 # Joystick
-Joystick in Rust. Compatible with wired, wireless, and Bluetooth connections.can run on Raspberry pi, not tested in other linux arm.
+Joystick in Rust. Compatible with wired, wireless, and Bluetooth connections.develop and tested on Raspberry pi, not verified in other linux arm.
