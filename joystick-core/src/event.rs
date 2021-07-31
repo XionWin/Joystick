@@ -18,8 +18,11 @@ impl Default for Event {
 }
 
 #[allow(dead_code)]
+#[repr(u8)]
 pub enum EventType {
     EventButton = 0x01,    /* button pressed/released */
 	EventAxis = 0x02,      /* joystick moved */
-	EventInit = 0x80
+	EventInit = 0x80,
+	EventButtonInit = 0x01 | 0x80,
+	EventAxisInit = 0x02 | 0x80
 }

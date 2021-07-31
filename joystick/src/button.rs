@@ -18,6 +18,12 @@ impl Clone for Button {
     }
 }
 
+impl super::control::Control for Button {
+    fn set_value(&mut self, value: i16) {
+        self.value = value
+    }
+}
+
 impl Button {
     pub fn parse(id: u8, key: &jsc::key::Key) -> Self {
         Self {

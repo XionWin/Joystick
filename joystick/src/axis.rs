@@ -18,6 +18,12 @@ impl Clone for Axis {
     }
 }
 
+impl super::control::Control for Axis {
+    fn set_value(&mut self, value: i16) {
+        self.value = value
+    }
+}
+
 impl Axis {
     pub fn parse(id: u8, axis: &jsc::axis::Axis) -> Self {
         Self {

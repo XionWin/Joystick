@@ -1,4 +1,8 @@
-use super::{axis::Axis, button::Button};
+use std::ops::IndexMut;
+
+use crate::control::Control;
+
+use super::{axis::Axis, button::Button, utils};
 use joystick_core as jsc;
 use jsc::{JsFile, OpenMode};
 
@@ -11,8 +15,8 @@ pub struct Gamepad {
     version: u32,
     name: String,
 
-    axes: Vec<Axis>,
-    buttons: Vec<Button>,
+    pub(crate) buttons: Vec<Button>,
+    pub(crate)axes: Vec<Axis>,
 }
 
 impl Default for Gamepad {
@@ -23,8 +27,8 @@ impl Default for Gamepad {
             file: Option::None,
             version: 0,
             name: String::from(""),
-            axes: Vec::<Axis>::new(),
             buttons: Vec::<Button>::new(),
+            axes: Vec::<Axis>::new(),
         }
     }
 }
@@ -58,7 +62,6 @@ impl Gamepad {
         let axis_count = file.read_axis_count().unwrap();
         let button_count = file.read_button_count().unwrap();
 
-
         let axes: Vec<Axis> = file
             .read_axis_mapping(axis_count as usize)
             .unwrap()
@@ -81,7 +84,11 @@ impl Gamepad {
         self.name = file.read_name().unwrap();
         self.axes = axes;
         self.buttons = buttons;
+
+        utils::update_init(self, file.read_init_event_with_no_block());
+
         self.file = Some(file);
+
 
         self.disconnect();
     }
@@ -101,6 +108,15 @@ impl Gamepad {
     pub fn get_buttons(&self) -> &Vec<Button> {
         &(self.buttons)
     }
+
+
+
+    pub fn update_button(&mut self, index: usize) {
+        let r = self.buttons.index_mut(index);
+        r.set_value(10);
+    }
+
+
 }
 
 #[macro_export]
@@ -109,4 +125,18 @@ macro_rules! listen {
         
     };
 }
+
+
+
+ 
+// #[macro_export]
+// macro_rules! begin_read_event {
+//     ($(#[$attr:meta])* $name:ident, $fd:expr) => {
+//         loop {
+//             $name(
+//                 joystick::read_event_with_block($fd)
+//             );
+//         }
+//     };
+// }
 

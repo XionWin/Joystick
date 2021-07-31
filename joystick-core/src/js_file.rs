@@ -103,21 +103,8 @@ impl JsFile {
     pub fn read_event_with_block(&self) -> Event {
         utils::read_event_with_block(self.fd())
     }
+
     pub fn read_init_event_with_no_block(&self) -> Vec<Event> {
         utils::read_init_event_with_no_block(self.fd())
     }
-
-    
-}
-
- 
-#[macro_export]
-macro_rules! begin_read_event {
-    ($(#[$attr:meta])* $name:ident, $fd:expr) => {
-        loop {
-            $name(
-                joystick::read_event_with_block($fd)
-            );
-        }
-    };
 }
