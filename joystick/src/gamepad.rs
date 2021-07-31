@@ -115,6 +115,14 @@ impl Gamepad {
         &self.buttons
     }
 
+    pub fn tset(&mut self) {
+        self.connect();
+        loop {
+            let event = self.file.as_mut().unwrap().read_event_with_block();
+            println!("{:?}", event);
+        }
+    }
+
 }
 
 
@@ -127,7 +135,7 @@ macro_rules! begin_read {
         loop {
             $gamepad.connect();
             let js_event = $gamepad.update();
-            println!("{:?}", $gamepad);
+            // println!("{:?}", $gamepad);
             $name(
                 js_event
             );

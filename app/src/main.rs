@@ -5,6 +5,7 @@ fn main() {
     println!("{:?}", &gamepad);
 
     joystick::begin_read!(read_event, &mut gamepad);
+    // gamepad.tset();
 
     // let file = OpenOptions::new()
     //     .read(true)

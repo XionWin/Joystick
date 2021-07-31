@@ -20,10 +20,10 @@ pub fn update_with_init_events(gamepad: &mut Gamepad, events: Vec<jsc::event::Ev
 
 pub fn update_with_events(gamepad: &mut Gamepad, event: jsc::event::Event) -> JsEvent {
     match event.type_ {
-        v if v == jsc::event::EventType::EventButton as u8 => {
+        v if v == jsc::event::EventType::EventButtonInit as u8 || v == jsc::event::EventType::EventButton as u8 => {
             update_button(gamepad, event)
         },
-        v if v == jsc::event::EventType::EventAxis as u8 => {
+        v if v == jsc::event::EventType::EventAxisInit as u8 || v == jsc::event::EventType::EventAxis as u8 => {
             update_axis(gamepad, event)
         },
         _ => JsEvent::default()
@@ -34,7 +34,11 @@ fn update_button(gamepad: &mut Gamepad, event: jsc::event::Event) -> JsEvent {
     let button = gamepad.buttons.index_mut(event.number as usize);
     button.set_value(event.value);
     JsEvent::new(
-        EventType::Button,
+        match event.type_ {
+            v if v == jsc::event::EventType::EventButtonInit as u8 => EventType::ButtonInit,
+            v if v == jsc::event::EventType::EventButton as u8 => EventType::Button,
+            _ => EventType::Unknown
+        },
         button.get_id(),
         button.get_alias(),
         button.get_value()
@@ -45,7 +49,11 @@ fn update_axis(gamepad: &mut Gamepad, event: jsc::event::Event) -> JsEvent {
     let axis = gamepad.axes.index_mut(event.number as usize);
     axis.set_value(event.value);
     JsEvent::new(
-        EventType::Axis,
+        match event.type_ {
+            v if v == jsc::event::EventType::EventAxisInit as u8 => EventType::AxisInit,
+            v if v == jsc::event::EventType::EventAxis as u8 => EventType::Axis,
+            _ => EventType::Unknown
+        },
         axis.get_id(),
         axis.get_alias(),
         axis.get_value()

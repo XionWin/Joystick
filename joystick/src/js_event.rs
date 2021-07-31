@@ -4,7 +4,9 @@
 pub enum EventType {
     Unknown = 0b0000,
     Button = 0b0001,
-    Axis = 0b0010
+    Axis = 0b0010,
+	ButtonInit = 0x01 | 0x80,
+	AxisInit = 0x02 | 0x80
 }
 
 #[derive(Debug)]
