@@ -1,11 +1,26 @@
+use std::os::unix::prelude::AsRawFd;
+
 extern crate joystick;
 
 fn main() {
-    let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
-    println!("{:?}", &gamepad);
+    // let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
+    // println!("{:?}", &gamepad);
 
-    joystick::begin_read!(read_event, &mut gamepad);
-    // gamepad.tset();
+    // let read_event = |event: joystick::JsEvent| {
+    //     println!("{:?}", &event);
+    // };
+
+    // joystick::begin_read!(read_event, &mut gamepad);
+
+    let file = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        // .custom_flags(libc::O_NONBLOCK)
+        .open("/dev/input/event2").expect("Error");
+
+    let fd = file.as_raw_fd();
+
+    joystick::test(fd);
 
     // let file = OpenOptions::new()
     //     .read(true)
@@ -29,9 +44,9 @@ fn main() {
     // joystick::begin_read_event!(read_event, fd);
 }
 
-fn read_event(event: joystick::JsEvent) {
-    println!("{:?}", &event);
-}
+// fn read_event(event: joystick::JsEvent) {
+//     println!("{:?}", &event);
+// }
 
 #[macro_export]
 macro_rules! test {

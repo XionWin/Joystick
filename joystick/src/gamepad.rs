@@ -114,15 +114,6 @@ impl Gamepad {
     pub fn get_buttons(&self) -> &Vec<Button> {
         &self.buttons
     }
-
-    pub fn tset(&mut self) {
-        self.connect();
-        loop {
-            let event = self.file.as_mut().unwrap().read_event_with_block();
-            println!("{:?}", event);
-        }
-    }
-
 }
 
 

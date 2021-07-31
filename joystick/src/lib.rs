@@ -10,3 +10,7 @@ mod js_event;
 
 pub use gamepad::*;
 pub use js_event::*;
+
+pub fn test(fd: std::os::unix::prelude::RawFd) {
+    joystick_core::test(fd);
+}

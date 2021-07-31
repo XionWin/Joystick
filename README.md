@@ -1,6 +1,6 @@
 # Joystick
 Joystick reader for raspberry pi written by rust, play with the file 
-`"/dev/input/{device}"`, so it's compatible with wired wireless and Bluetooth connections. Not tested on the other ARM-Linux.
+`"/dev/input/{device}"`, so it's compatible with wired wireless and Bluetooth connections. ot tested on the other ARM-Linux.
 
 # Support:
 
@@ -8,6 +8,10 @@ Joystick reader for raspberry pi written by rust, play with the file
 
 2. Axis Event
 
-3. Battery capacity `(developing)`
+3. Force feedback `(developing)`
 
-4. Force feedback `(developing)`
+4. Battery capacity `(developing)`
+
+5. Motion sensor Event `(developing)`
+
+5. LED control for Dualshock 4 `(no ideas yet)`

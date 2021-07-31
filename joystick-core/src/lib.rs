@@ -3,6 +3,7 @@ extern crate bitflags;
 
 pub(crate) mod def;
 pub(crate) mod env;
+pub(crate) mod ff;
 pub mod utils;
 pub mod axis;
 pub mod key;
@@ -12,7 +13,93 @@ mod js_file;
 pub use js_file::*;
 
 
+macro_rules! ioc {
+    ($dir:expr, $ty:expr, $nr:expr, $sz:expr) => (
+        (($dir as env::IoctlNumType & env::DIRMASK) << env::DIRSHIFT) |
+        (($ty as env::IoctlNumType & env::TYPEMASK) << env::TYPESHIFT) |
+        (($nr as env::IoctlNumType & env::NRMASK) << env::NRSHIFT) |
+        (($sz as env::IoctlNumType & env::SIZEMASK) << env::SIZESHIFT))
+}
 
+const EV_FF: u16 = 0x15;
+const FF_RUMBLE: u16 = 0x50;
+pub fn test (fd: std::os::unix::prelude::RawFd) {
+
+    let mut effect_code = -1i16;
+    const EVIOCSFF: env::IoctlNumType = ioc!(env::consts::WRITE, b'E', 0x80, core::mem::size_of::<ff::ff_effect>());
+    
+    let mut effect = ff::ff_effect {
+        type_: FF_RUMBLE,
+        id: -1,
+        direction: 0,
+        trigger: Default::default(),
+        replay: Default::default(),
+        u: Default::default(),
+    };
+    unsafe {
+        #[allow(clippy::unnecessary_mut_passed)]
+        let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
+        effect_code = effect.id;
+        println!("{:?}", r);
+    }
+
+
+
+    let strong = 10000u16;
+    let weak = 1000u16;
+    let min_duration = core::time::Duration::from_millis(20);
+    let duration = min_duration.as_secs() * 1000 + u64::from(min_duration.subsec_millis());
+    let duration = if duration > u64::from(u16::MAX) {
+        u16::MAX
+    } else {
+        duration as u16
+    };
+
+    let mut effect = ff::ff_effect {
+        type_: FF_RUMBLE,
+        id: 0x00,
+        direction: 0,
+        trigger: Default::default(),
+        replay: ff::ff_replay {
+            delay: 0,
+            length: duration,
+        },
+        u: Default::default(),
+    };
+
+    unsafe {
+
+        let rumble = &mut effect.u as *mut _ as *mut ff::ff_rumble_effect;
+        (*rumble).strong_magnitude = strong;
+        (*rumble).weak_magnitude = weak;
+
+
+        let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
+        println!("{:?}", r);
+    }
+
+    let time = libc::timeval {
+        tv_sec: 0,
+        tv_usec: 0,
+    };
+    let ev = ff::input_event {
+        type_: EV_FF,
+        code: effect_code as u16,
+        value: 0xFFFFi32 * 100 / 100,
+        time,
+    };
+
+    let size = core::mem::size_of::<ff::input_event>();
+    let s = unsafe { std::slice::from_raw_parts(&ev as *const _ as *const u8, size) };
+    
+    unsafe {
+        let r = libc::write(fd, (s as *const _) as *const libc::c_void, size);
+        println!("{:?}", r);
+    }
+
+    std::thread::sleep(core::time::Duration::from_secs(2));
+
+}
 
 // use std::{ffi::CStr, os::unix::prelude::RawFd};
 // use ::core::{default::Default, mem};
