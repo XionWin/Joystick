@@ -22,6 +22,15 @@ impl super::control::Control for Button {
     fn set_value(&mut self, value: i16) {
         self.value = value
     }
+    fn get_id(&self) -> u8 {
+        self.id
+    }
+    fn get_alias(&self) -> &str {
+        &self.alias
+    }
+    fn get_value(&self) -> i16 {
+        self.value
+    }
 }
 
 impl Button {

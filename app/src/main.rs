@@ -1,8 +1,10 @@
 extern crate joystick;
 
 fn main() {
-    let pad = joystick::Gamepad::new("/dev/input/js0");
-    println!("{:?}", pad);
+    let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
+    println!("{:?}", &gamepad);
+
+    joystick::begin_read!(read_event, &mut gamepad);
 
     // let file = OpenOptions::new()
     //     .read(true)
@@ -26,9 +28,9 @@ fn main() {
     // joystick::begin_read_event!(read_event, fd);
 }
 
-// fn read_event(event: joystick::core::event::Event) {
-//     println!("{:?}", event);
-// }
+fn read_event(event: joystick::JsEvent) {
+    println!("{:?}", &event);
+}
 
 #[macro_export]
 macro_rules! test {

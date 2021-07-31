@@ -44,6 +44,13 @@ impl JsFile {
             None => -1
         }
     }
+
+    pub fn is_connected(&self) -> bool {
+        match self.file {
+            Some(_) => true,
+            None => false
+        }
+    }
     
     pub fn open(mut self, mode: OpenMode) -> Self {
         let mut file_options = std::fs::OpenOptions::new();

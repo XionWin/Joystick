@@ -1,3 +1,5 @@
+use crate::JsEvent;
+
 use super::{axis::Axis, button::Button, utils};
 use joystick_core as jsc;
 use jsc::{JsFile, OpenMode};
@@ -46,9 +48,15 @@ impl Gamepad {
     }
 
     pub fn connect(&mut self) {
-        match self.file {
-            Some(_) => {}
-            None => {}
+        match &self.file {
+            Some(js_file) => {
+                if !js_file.is_connected() {
+                    self.open_mode = self.open_mode ^ OpenMode::NONBLOCK;
+                    self.file = Some(JsFile::new(&self.path).open(self.open_mode));
+                }
+            }
+            None => {
+            }
         }
     }
 
@@ -87,6 +95,10 @@ impl Gamepad {
         self.disconnect();
     }
 
+    pub fn update(&mut self) -> JsEvent {
+        utils::update_with_events(self, self.file.as_ref().unwrap().read_event_with_block())
+    }
+
     pub fn get_version(&self) -> u32 {
         self.version
     }
@@ -96,34 +108,30 @@ impl Gamepad {
     }
 
     pub fn get_axes(&self) -> &Vec<Axis> {
-        &(self.axes)
+        &self.axes
     }
 
     pub fn get_buttons(&self) -> &Vec<Button> {
-        &(self.buttons)
+        &self.buttons
     }
 
-
 }
 
-#[macro_export]
-macro_rules! listen {
-    () => {
-        
-    };
-}
 
 
 
  
-// #[macro_export]
-// macro_rules! begin_read_event {
-//     ($(#[$attr:meta])* $name:ident, $fd:expr) => {
-//         loop {
-//             $name(
-//                 joystick::read_event_with_block($fd)
-//             );
-//         }
-//     };
-// }
+#[macro_export]
+macro_rules! begin_read {
+    ($(#[$attr:meta])* $name:ident, $gamepad:expr) => {
+        loop {
+            $gamepad.connect();
+            let js_event = $gamepad.update();
+            println!("{:?}", $gamepad);
+            $name(
+                js_event
+            );
+        }
+    };
+}
 

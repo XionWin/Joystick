@@ -6,7 +6,7 @@ mod axis;
 mod button;
 mod gamepad;
 mod utils;
+mod js_event;
 
 pub use gamepad::*;
-
-pub use joystick_core::*;
+pub use js_event::*;

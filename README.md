@@ -1,2 +1,3 @@
 # Joystick
-Joystick in Rust. Compatible with wired, wireless, and Bluetooth connections.develop and tested on Raspberry pi, not verified in other linux arm.
+Joystick reader for raspberry pi written by rust, play with the file 
+`"/dev/input/{device}"`, so it's compatible with wired wireless and bluetooth connections. not tested on the other ARM-Linux.
