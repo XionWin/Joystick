@@ -53,7 +53,7 @@ const EVIOCSFF: env::IoctlNumType = ioc!(
     env::consts::WRITE,
     b'E',
     0x80,
-    core::mem::size_of::<ff::ff_effect>()
+    core::mem::size_of::<ff::FfEffect>()
 );
 const EVIOCRMFF: env::IoctlNumType = ioc!(
     env::consts::WRITE,
@@ -85,25 +85,25 @@ pub fn test(fd: std::os::unix::prelude::RawFd) {
 
 pub fn upload_periodic_effect(fd: RawFd) -> i16 {
     let effect_type = FF_PERIOD;
-    let mut effect = ff::ff_effect {
+    let mut effect = ff::FfEffect {
         type_: effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
         replay: Default::default(),
-        effect:  ff::effect_union {
-            periodic: ff::ff_periodic_effect {
+        effect:  ff::UEffect {
+            periodic: ff::PeriodicEffect {
                 waveform: ff::WaveForm::FF_SINE,
-                period: 100,	/* 0.1 second */
-                magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
+                period: 0,	/* 0.1 second */
+                magnitude: 0,	/* 0.5 * Maximum magnitude */
                 offset: 0,
                 phase: 0,
             
-                envelope: ff::ff_envelope {
-                    attack_length: 1000,
-                    attack_level: 0x7fff,
-                    fade_length: 1000,
-                    fade_level: 0x7fff,
+                envelope: ff::Envelope {
+                    attack_length: 0,
+                    attack_level: 0,
+                    fade_length: 0,
+                    fade_level: 0,
                 },
             
                 custom_len: 0,
@@ -129,28 +129,28 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
             duration as u16
         };
 
-        let mut effect = ff::ff_effect {
+        let mut effect = ff::FfEffect {
             type_: effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
-            replay: ff::ff_replay {
+            replay: ff::Replay {
                 delay: 0,
                 length: duration,
             },
-            effect: ff::effect_union {
-                periodic: ff::ff_periodic_effect {
+            effect: ff::UEffect {
+                periodic: ff::PeriodicEffect {
                     waveform: ff::WaveForm::FF_SINE,
                     period: 100,	/* 0.1 second */
                     magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
                     offset: 0,
                     phase: 0,
                 
-                    envelope: ff::ff_envelope {
+                    envelope: ff::Envelope {
                         attack_length: 1000,
-                        attack_level: 0x7fff,
+                        attack_level: 0x00ff,
                         fade_length: 1000,
-                        fade_level: 0x7fff,
+                        fade_level: 0x00ff,
                     },
                 
                     custom_len: 0,
@@ -169,14 +169,14 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
 
 pub fn upload_rumble_effect(fd: RawFd) -> i16 {
     let effect_type = FF_RUMBLE;
-    let mut effect = ff::ff_effect {
+    let mut effect = ff::FfEffect {
         type_: effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
         replay: Default::default(),
-        effect:  ff::effect_union {
-            rumble: ff::ff_rumble_effect {
+        effect:  ff::UEffect {
+            rumble: ff::RumbleEffect {
                 strong_magnitude: 0,
                 weak_magnitude: 0,
             }
@@ -200,17 +200,17 @@ pub fn upload_rumble_effect(fd: RawFd) -> i16 {
             duration as u16
         };
 
-        let mut effect = ff::ff_effect {
+        let mut effect = ff::FfEffect {
             type_: effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
-            replay: ff::ff_replay {
+            replay: ff::Replay {
                 delay: 0,
                 length: duration,
             },
-            effect: ff::effect_union {
-                rumble: ff::ff_rumble_effect {
+            effect: ff::UEffect {
+                rumble: ff::RumbleEffect {
                     strong_magnitude: 0x8000,
                     weak_magnitude: 0,
                 }
@@ -230,14 +230,14 @@ pub fn run (fd: RawFd, effect_id: i16) {
         tv_sec: 0,
         tv_usec: 0,
     };
-    let ev = ff::input_event {
+    let ev = ff::InputEvent {
         type_: EV_FF,
         code: effect_id as u16,
         value: 10,
         time,
     };
 
-    let size = core::mem::size_of::<ff::input_event>();
+    let size = core::mem::size_of::<ff::InputEvent>();
     let s = unsafe { std::slice::from_raw_parts(&ev as *const _ as *const u8, size) };
 
     unsafe {

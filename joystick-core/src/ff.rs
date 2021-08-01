@@ -2,48 +2,48 @@
 
 #[derive(Copy, Clone, Default)]
 #[repr(C)]
-pub struct ff_trigger {
+pub struct Trigger {
     pub button: u16,
     pub interval: u16,
 }
 
 #[derive(Copy, Clone, Default)]
 #[repr(C)]
-pub struct ff_replay {
+pub struct Replay {
     pub length: u16,
     pub delay: u16,
 }
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct ff_effect {
+pub struct FfEffect {
     pub type_: u16,
     pub id: i16,
     pub direction: u16,
-    pub trigger: ff_trigger,
-    pub replay: ff_replay,
+    pub trigger: Trigger,
+    pub replay: Replay,
     // FIXME this is actually a union
-    pub effect: effect_union
+    pub effect: UEffect
 }
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub union effect_union {
-    pub periodic: ff_periodic_effect,
-    pub rumble: ff_rumble_effect
+pub union UEffect {
+    pub periodic: PeriodicEffect,
+    pub rumble: RumbleEffect
 }
 
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct ff_rumble_effect {
+pub struct RumbleEffect {
     pub strong_magnitude: u32,
     pub weak_magnitude: u32,
 }
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct ff_envelope {
+pub struct Envelope {
 	pub attack_length: u16,
 	pub attack_level: u16,
 	pub fade_length: u16,
@@ -66,14 +66,14 @@ pub enum WaveForm {
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct ff_periodic_effect {
+pub struct PeriodicEffect {
 	pub waveform: WaveForm,
 	pub period: u16,
 	pub magnitude: i16,
 	pub offset: i16,
 	pub phase: u16,
 
-	pub envelope: ff_envelope,
+	pub envelope: Envelope,
 
 	pub custom_len: u32,
 	pub __user: *const u16,
@@ -81,14 +81,14 @@ pub struct ff_periodic_effect {
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct input_event {
+pub struct InputEvent {
     pub time: libc::timeval,
     pub type_: u16,
     pub code: u16,
     pub value: i32,
 }
 
-impl ::std::default::Default for input_event {
+impl ::std::default::Default for InputEvent {
     fn default() -> Self {
         unsafe { ::std::mem::zeroed() }
     }

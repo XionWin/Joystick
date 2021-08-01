@@ -14,4 +14,4 @@ Joystick reader for raspberry pi written by rust, play with the file
 
 5. Motion sensor Event `(developing)`
 
-5. LED control for Dualshock 4 `(no ideas yet)`
+5. RGB control for Dualshock 4 `(developing)`
