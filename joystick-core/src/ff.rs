@@ -1,5 +1,3 @@
-
-
 #[derive(Copy, Clone, Default)]
 #[repr(C)]
 pub struct Trigger {
@@ -50,6 +48,17 @@ pub struct Envelope {
 	pub fade_level: u16,
 }
 
+impl Default for Envelope {
+    fn default() -> Self {
+        Self {
+            attack_length: 0,
+            attack_level: 0,
+            fade_length: 0,
+            fade_level: 0
+        }
+    }
+}
+
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[repr(u16)]
@@ -77,6 +86,23 @@ pub struct PeriodicEffect {
 
 	pub custom_len: u32,
 	pub __user: *const u16,
+}
+
+impl Default for PeriodicEffect {
+    fn default() -> Self {
+        Self {
+            waveform: WaveForm::FF_SINE,
+            period: 0,
+            magnitude: 0,
+            offset: 0,
+            phase: 0,
+            envelope: Default::default(),
+            custom_len: 0,
+            __user: unsafe {
+                core::mem::zeroed()
+            }
+        }
+    }
 }
 
 #[derive(Copy, Clone)]

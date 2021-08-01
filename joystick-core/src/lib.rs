@@ -92,24 +92,8 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
         trigger: Default::default(),
         replay: Default::default(),
         effect:  ff::UEffect {
-            periodic: ff::PeriodicEffect {
-                waveform: ff::WaveForm::FF_SINE,
-                period: 0,	/* 0.1 second */
-                magnitude: 0,	/* 0.5 * Maximum magnitude */
-                offset: 0,
-                phase: 0,
-            
-                envelope: ff::Envelope {
-                    attack_length: 0,
-                    attack_level: 0,
-                    fade_length: 0,
-                    fade_level: 0,
-                },
-            
-                custom_len: 0,
-                __user: [0,0,0].as_ptr(),
-            }
-        },
+            periodic: Default::default()
+        }
     };
 
     let result: i32;
@@ -154,9 +138,11 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
                     },
                 
                     custom_len: 0,
-                    __user: [0,0,0].as_ptr(),
+                    __user: unsafe {
+                        core::mem::zeroed()
+                    },
                 }
-            },
+            }
         };
 
         unsafe {
