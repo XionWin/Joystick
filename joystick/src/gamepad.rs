@@ -117,9 +117,6 @@ impl Gamepad {
 }
 
 
-
-
- 
 #[macro_export]
 macro_rules! begin_read {
     ($(#[$attr:meta])* $name:ident, $gamepad:expr) => {

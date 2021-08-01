@@ -1,105 +1,253 @@
 #[macro_use]
 extern crate bitflags;
 
+pub mod axis;
 pub(crate) mod def;
 pub(crate) mod env;
-pub(crate) mod ff;
-pub mod utils;
-pub mod axis;
-pub mod key;
 pub mod event;
+pub(crate) mod ff;
 mod js_file;
+pub mod key;
+pub mod utils;
+
+use std::{os::{unix::prelude::RawFd}};
 
 pub use js_file::*;
 
+// #define EVIOCGMTSLOTS(len)	_IOC(_IOC_READ, 'E', 0x0a, len)
+
+// #define EVIOCGKEY(len)		_IOC(_IOC_READ, 'E', 0x18, len)		/* get global key state */
+// #define EVIOCGLED(len)		_IOC(_IOC_READ, 'E', 0x19, len)		/* get all LEDs */
+// #define EVIOCGSND(len)		_IOC(_IOC_READ, 'E', 0x1a, len)		/* get all sounds status */
+// #define EVIOCGSW(len)		_IOC(_IOC_READ, 'E', 0x1b, len)		/* get all switch states */
+// #define EVIOCGBIT(ev,len)	_IOC(_IOC_READ, 'E', 0x20 + (ev), len)	/* get event bits */
+// #define EVIOCGABS(abs)		_IOR('E', 0x40 + (abs), struct input_absinfo)	/* get abs value/limits */
+// #define EVIOCSABS(abs)		_IOW('E', 0xc0 + (abs), struct input_absinfo)	/* set abs value/limits */
+// #define EVIOCSFF		_IOW('E', 0x80, struct ff_effect)	/* send a force effect to a force feedback device */
+// #define EVIOCRMFF		_IOW('E', 0x81, int)			/* Erase a force effect */
+// #define EVIOCGEFFECTS		_IOR('E', 0x84, int)			/* Report number of effects playable at the same time */
+// #define EVIOCGRAB		_IOW('E', 0x90, int)			/* Grab/Release device */
+// #define EVIOCREVOKE		_IOW('E', 0x91, int)			/* Revoke device access */
 
 macro_rules! ioc {
-    ($dir:expr, $ty:expr, $nr:expr, $sz:expr) => (
-        (($dir as env::IoctlNumType & env::DIRMASK) << env::DIRSHIFT) |
-        (($ty as env::IoctlNumType & env::TYPEMASK) << env::TYPESHIFT) |
-        (($nr as env::IoctlNumType & env::NRMASK) << env::NRSHIFT) |
-        (($sz as env::IoctlNumType & env::SIZEMASK) << env::SIZESHIFT))
+    ($dir:expr, $ty:expr, $nr:expr, $sz:expr) => {
+        (($dir as env::IoctlNumType & env::DIRMASK) << env::DIRSHIFT)
+            | (($ty as env::IoctlNumType & env::TYPEMASK) << env::TYPESHIFT)
+            | (($nr as env::IoctlNumType & env::NRMASK) << env::NRSHIFT)
+            | (($sz as env::IoctlNumType & env::SIZEMASK) << env::SIZESHIFT)
+    };
 }
 
 const EV_FF: u16 = 0x15;
 const FF_RUMBLE: u16 = 0x50;
-pub fn test (fd: std::os::unix::prelude::RawFd) {
+const FF_PERIOD: u16 = 0x51;
+const FF_CONSTA: u16 = 0x52;
+const FF_SPRING: u16 = 0x53;
+const FF_FRICTI: u16 = 0x54;
+const FF_DAMPER: u16 = 0x55;
+const FF_INERTI: u16 = 0x56;
+const FF_RAMP: u16 = 0x57;
 
-    let mut effect_code = -1i16;
-    const EVIOCSFF: env::IoctlNumType = ioc!(env::consts::WRITE, b'E', 0x80, core::mem::size_of::<ff::ff_effect>());
+
+const EVIOCSFF: env::IoctlNumType = ioc!(
+    env::consts::WRITE,
+    b'E',
+    0x80,
+    core::mem::size_of::<ff::ff_effect>()
+);
+const EVIOCRMFF: env::IoctlNumType = ioc!(
+    env::consts::WRITE,
+    b'E',
+    0x81,
+    core::mem::size_of::<libc::c_int>()
+);
+
+const EVIOCGEFFECTS: env::IoctlNumType = ioc!(
+    env::consts::READ,
+    b'E',
+    0x84,
+    core::mem::size_of::<libc::c_int>()
+);
+
+pub fn test(fd: std::os::unix::prelude::RawFd) {
+    // let effect_types = vec![FF_PERIOD, FF_CONSTA, FF_RUMBLE, FF_SPRING, FF_FRICTI,
+    //     FF_DAMPER, FF_INERTI, FF_RAMP, FF_SQUARE, FF_TRIANG,
+    //     FF_SINE, FF_SAW_UP, FF_SAW_DO, FF_CUSTOM, FF_GAIN, FF_AUTOCE];
+
+    let effect_ids = vec![upload_periodic_effect(fd), upload_rumble_effect(fd)];
     
+    loop {
+        for effect_id in &effect_ids {
+            run(fd, *effect_id);
+        }
+    }
+}
+
+pub fn upload_periodic_effect(fd: RawFd) -> i16 {
+    let effect_type = FF_PERIOD;
     let mut effect = ff::ff_effect {
-        type_: FF_RUMBLE,
+        type_: effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
         replay: Default::default(),
-        u: Default::default(),
+        effect:  ff::effect_union {
+            periodic: ff::ff_periodic_effect {
+                waveform: ff::WaveForm::FF_SINE,
+                period: 100,	/* 0.1 second */
+                magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
+                offset: 0,
+                phase: 0,
+            
+                envelope: ff::ff_envelope {
+                    attack_length: 1000,
+                    attack_level: 0x7fff,
+                    fade_length: 1000,
+                    fade_level: 0x7fff,
+                },
+            
+                custom_len: 0,
+                __user: [0,0,0].as_ptr(),
+            }
+        },
     };
+
+    let result: i32;
+    let effect_id: i16;
     unsafe {
-        #[allow(clippy::unnecessary_mut_passed)]
-        let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
-        effect_code = effect.id;
-        println!("{:?}", r);
+        result = libc::ioctl(fd, EVIOCSFF, &mut effect);
+        effect_id = effect.id;
+        println!("upload id: {}, result: {:?}", effect_id, result);
     }
 
+    if result == 0 {
+        let min_duration = core::time::Duration::from_millis(20);
+        let duration = min_duration.as_secs() * 1000 + u64::from(min_duration.subsec_millis());
+        let duration = if duration > u64::from(u16::MAX) {
+            u16::MAX
+        } else {
+            duration as u16
+        };
 
+        let mut effect = ff::ff_effect {
+            type_: effect_type,
+            id: effect_id,
+            direction: 0,
+            trigger: Default::default(),
+            replay: ff::ff_replay {
+                delay: 0,
+                length: duration,
+            },
+            effect: ff::effect_union {
+                periodic: ff::ff_periodic_effect {
+                    waveform: ff::WaveForm::FF_SINE,
+                    period: 100,	/* 0.1 second */
+                    magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
+                    offset: 0,
+                    phase: 0,
+                
+                    envelope: ff::ff_envelope {
+                        attack_length: 1000,
+                        attack_level: 0x7fff,
+                        fade_length: 1000,
+                        fade_level: 0x7fff,
+                    },
+                
+                    custom_len: 0,
+                    __user: [0,0,0].as_ptr(),
+                }
+            },
+        };
 
-    let strong = 10000u16;
-    let weak = 1000u16;
-    let min_duration = core::time::Duration::from_millis(20);
-    let duration = min_duration.as_secs() * 1000 + u64::from(min_duration.subsec_millis());
-    let duration = if duration > u64::from(u16::MAX) {
-        u16::MAX
-    } else {
-        duration as u16
-    };
+        unsafe {
+            let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
+            println!("{:?}", r);
+        }
+    }
+    effect_id
+}
 
+pub fn upload_rumble_effect(fd: RawFd) -> i16 {
+    let effect_type = FF_RUMBLE;
     let mut effect = ff::ff_effect {
-        type_: FF_RUMBLE,
-        id: 0x00,
+        type_: effect_type,
+        id: -1,
         direction: 0,
         trigger: Default::default(),
-        replay: ff::ff_replay {
-            delay: 0,
-            length: duration,
+        replay: Default::default(),
+        effect:  ff::effect_union {
+            rumble: ff::ff_rumble_effect {
+                strong_magnitude: 0,
+                weak_magnitude: 0,
+            }
         },
-        u: Default::default(),
     };
 
+    let result: i32;
+    let effect_id: i16;
     unsafe {
-
-        let rumble = &mut effect.u as *mut _ as *mut ff::ff_rumble_effect;
-        (*rumble).strong_magnitude = strong;
-        (*rumble).weak_magnitude = weak;
-
-
-        let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
-        println!("{:?}", r);
+        result = libc::ioctl(fd, EVIOCSFF, &mut effect);
+        effect_id = effect.id;
+        println!("upload id: {}, result: {:?}", effect_id, result);
     }
 
+    if result == 0 {
+        let min_duration = core::time::Duration::from_millis(20);
+        let duration = min_duration.as_secs() * 1000 + u64::from(min_duration.subsec_millis());
+        let duration = if duration > u64::from(u16::MAX) {
+            u16::MAX
+        } else {
+            duration as u16
+        };
+
+        let mut effect = ff::ff_effect {
+            type_: effect_type,
+            id: effect_id,
+            direction: 0,
+            trigger: Default::default(),
+            replay: ff::ff_replay {
+                delay: 0,
+                length: duration,
+            },
+            effect: ff::effect_union {
+                rumble: ff::ff_rumble_effect {
+                    strong_magnitude: 0x8000,
+                    weak_magnitude: 0,
+                }
+            },
+        };
+
+        unsafe {
+            let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
+            println!("{:?}", r);
+        }
+    }
+    effect_id
+}
+
+pub fn run (fd: RawFd, effect_id: i16) {
     let time = libc::timeval {
         tv_sec: 0,
         tv_usec: 0,
     };
     let ev = ff::input_event {
         type_: EV_FF,
-        code: effect_code as u16,
-        value: 0xFFFFi32 * 100 / 100,
+        code: effect_id as u16,
+        value: 10,
         time,
     };
 
     let size = core::mem::size_of::<ff::input_event>();
     let s = unsafe { std::slice::from_raw_parts(&ev as *const _ as *const u8, size) };
-    
+
     unsafe {
         let r = libc::write(fd, (s as *const _) as *const libc::c_void, size);
         println!("{:?}", r);
     }
-
     std::thread::sleep(core::time::Duration::from_secs(2));
-
 }
+
+
 
 // use std::{ffi::CStr, os::unix::prelude::RawFd};
 // use ::core::{default::Default, mem};
@@ -180,7 +328,6 @@ pub fn test (fd: std::os::unix::prelude::RawFd) {
 //     read_number!(fd, JSIOCGBUTTONS, u8)
 // }
 
-
 // pub fn read_axis_mapping(fd: RawFd, size: usize) -> Result<Vec<Axis>, &'static str> {
 //     let mut buf = vec![Axis::default(); size];
 //     match read_buf!(fd, get_buf_req!(JOYSTICK_MAGIC, 0x32, mem::size_of::<Axis>() * size), buf.as_mut_ptr()) {
@@ -228,7 +375,7 @@ pub fn test (fd: std::os::unix::prelude::RawFd) {
 //     let fd = file.as_raw_fd();
 
 //     let mut buf = Event::default();
-    
+
 //     while unsafe {
 //         libc::read(fd, (&mut buf as *mut _) as *mut libc::c_void, mem::size_of::<Event>()) > 0
 //     } {
