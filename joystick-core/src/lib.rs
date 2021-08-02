@@ -8,6 +8,7 @@ mod ff;
 
 pub use js::{linux::*, js_file::*};
 pub use ff::{linux::*, ff_file::*};
+pub use file::OpenMode;
 
 use std::{os::{unix::prelude::RawFd}};
 use file::{def::*};
