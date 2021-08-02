@@ -24,13 +24,13 @@ pub mod abs {
     pub const ABS_TILT_X: u16 = 0x1a;
     pub const ABS_TILT_Y: u16 = 0x1b;
     pub const ABS_TOOL_WIDTH: u16 = 0x1c;
-
+    
     pub const ABS_VOLUME: u16 = 0x20;
-
+    
     pub const ABS_MISC: u16 = 0x28;
-
+    
     pub const ABS_RESERVED: u16 = 0x2e;
-
+    
     pub const ABS_MT_SLOT: u16 = 0x2f;
     pub const ABS_MT_TOUCH_MAJOR: u16 = 0x30;
     pub const ABS_MT_TOUCH_MINOR: u16 = 0x31;
@@ -46,8 +46,6 @@ pub mod abs {
     pub const ABS_MT_DISTANCE: u16 = 0x3b;
     pub const ABS_MT_TOOL_X: u16 = 0x3c;
     pub const ABS_MT_TOOL_Y: u16 = 0x3d;
-
     pub const ABS_MAX: u16 = 0x3f;
     pub const ABS_CNT: u16 = ABS_MAX + 1;
-
 }

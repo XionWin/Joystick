@@ -85,7 +85,7 @@ pub struct PeriodicEffect {
 	pub envelope: Envelope,
 
 	pub custom_len: u32,
-	pub __user: *const u16,
+	pub custom_data: *const u16,
 }
 
 impl Default for PeriodicEffect {
@@ -98,7 +98,7 @@ impl Default for PeriodicEffect {
             phase: 0,
             envelope: Default::default(),
             custom_len: 0,
-            __user: unsafe {
+            custom_data: unsafe {
                 core::mem::zeroed()
             }
         }

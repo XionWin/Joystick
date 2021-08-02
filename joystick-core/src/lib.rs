@@ -1,16 +1,14 @@
 #[macro_use]
 extern crate bitflags;
 
-pub mod axis;
 pub(crate) mod def;
-pub(crate) mod env;
-pub mod event;
-pub(crate) mod ff;
+pub mod linux;
 mod js_file;
-pub mod key;
 pub mod utils;
 
 use std::{os::{unix::prelude::RawFd}};
+
+use linux::{env, ff};
 
 pub use js_file::*;
 
@@ -138,7 +136,7 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
                     },
                 
                     custom_len: 0,
-                    __user: unsafe {
+                    custom_data: unsafe {
                         core::mem::zeroed()
                     },
                 }

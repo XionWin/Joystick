@@ -1,10 +1,7 @@
 use std::{ffi::CStr, os::unix::prelude::RawFd};
 use ::core::{default::Default, mem};
 
-use crate::env;
-use crate::axis::Axis;
-use crate::key::Key;
-use crate::event::Event;
+use crate::linux::{env, key::Key, axis::Axis, event::Event};
 
 const JOYSTICK_MAGIC: libc::c_uchar = b'j';
 

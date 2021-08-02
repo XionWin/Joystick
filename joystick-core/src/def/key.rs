@@ -606,5 +606,4 @@ pub mod key {
     pub const KEY_MIN_INTERESTING: u16 = KEY_MUTE;
     pub const KEY_MAX: u16 = 0x2ff;
     pub const KEY_CNT: u16 = KEY_MAX + 1;
-
 }

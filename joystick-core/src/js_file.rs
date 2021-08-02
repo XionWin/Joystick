@@ -1,5 +1,5 @@
 use std::{fs::File, os::unix::prelude::{AsRawFd, OpenOptionsExt, RawFd}};
-use crate::{axis::Axis, event::Event, key::Key};
+use crate::linux::{axis::Axis, event::Event, key::Key};
 
 use super::utils;
 
