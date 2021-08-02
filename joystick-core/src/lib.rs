@@ -1,15 +1,15 @@
 #[macro_use]
 extern crate bitflags;
 
-use std::{os::{unix::prelude::RawFd}};
-
 mod js;
 mod ff;
 
 pub use js::{linux::*, js_file::*};
 pub use ff::{linux::*, ff_file::*};
 
+use std::{os::{unix::prelude::RawFd}};
 use js::{def::env};
+
 
 // #define EVIOCGMTSLOTS(len)	_IOC(_IOC_READ, 'E', 0x0a, len)
 
