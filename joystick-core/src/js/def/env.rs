@@ -1,3 +1,4 @@
+#[doc(hidden)]
 pub type IoctlNumType = ::libc::c_int;
 
 #[doc(hidden)]

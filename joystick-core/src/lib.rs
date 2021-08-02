@@ -3,13 +3,13 @@ extern crate bitflags;
 
 use std::{os::{unix::prelude::RawFd}};
 
-pub mod js;
-pub mod ff;
+mod js;
+mod ff;
 
+pub use js::{linux::*, js_file::*};
+pub use ff::{linux::*, ff_file::*};
 
-use crate::js::def::env;
-pub use crate::ff::linux::forece_feedback;
-pub use js::js_file::*;
+use js::{def::env};
 
 // #define EVIOCGMTSLOTS(len)	_IOC(_IOC_READ, 'E', 0x0a, len)
 

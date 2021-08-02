@@ -34,7 +34,7 @@ impl super::control::Control for Axis {
 }
 
 impl Axis {
-    pub fn parse(id: u8, axis: &jsc::js::linux::Axis) -> Self {
+    pub fn parse(id: u8, axis: &jsc::Axis) -> Self {
         Self {
             id,
             alias: axis.to_string(),
