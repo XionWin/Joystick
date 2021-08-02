@@ -15,7 +15,7 @@ impl FfFile {
         }
     }
 
-    fn fd(&self) -> RawFd {
+    pub fn get_fd(&self) -> RawFd {
         match &self.file {
             Some(f) => f.as_raw_fd(),
             None => -1

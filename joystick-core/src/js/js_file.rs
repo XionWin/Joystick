@@ -1,4 +1,4 @@
-use std::{fs::File, io::LineWriter, os::unix::prelude::{AsRawFd, OpenOptionsExt, RawFd}};
+use std::{os::unix::prelude::RawFd};
 
 use super::linux::{Axis, Event, Key};
 
@@ -34,7 +34,7 @@ impl JsFile {
         self.file.close();
     }
 
-    pub fn switch(mut self, mode: OpenMode) {
+    pub fn switch(self, mode: OpenMode) {
         self.file.switch(mode);
     }
 

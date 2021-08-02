@@ -3,7 +3,7 @@ use ::core::{default::Default, mem};
 
 
 use super::super::file::def::env;
-use super::linux::{Key, Axis, Event};
+use super::linux::{Key, Axis};
 
 use crate::{ioc, read_number, get_buf_req, read_buf};
 
