@@ -2,6 +2,8 @@
 Joystick reader for raspberry pi written by rust, play with the file 
 `"/dev/input/{device}"`, so it's compatible with wired wireless and Bluetooth connections. ot tested on the other ARM-Linux.
 
+![Alt text](icon.png "Optional title")
+
 # Support:
 
 1. Button Event
