@@ -1,7 +1,8 @@
 use std::{ffi::CStr, os::unix::prelude::RawFd};
 use ::core::{default::Default, mem};
 
-use crate::linux::{env, key::Key, axis::Axis, event::Event};
+use super::def::env;
+use super::linux::{Key, Axis, Event};
 
 const JOYSTICK_MAGIC: libc::c_uchar = b'j';
 
@@ -13,13 +14,13 @@ macro_rules! ioc {
         (($sz as env::IoctlNumType & env::SIZEMASK) << env::SIZESHIFT))
 }
 
-const JSIOCGVERSION: env::IoctlNumType = ioc!(env::consts::READ, JOYSTICK_MAGIC, 0x01, mem::size_of::<libc::__u32>());
-const JSIOCGAXES: env::IoctlNumType = ioc!(env::consts::READ, JOYSTICK_MAGIC, 0x11, mem::size_of::<libc::__u8>());
-const JSIOCGBUTTONS: env::IoctlNumType = ioc!(env::consts::READ, JOYSTICK_MAGIC, 0x12, mem::size_of::<libc::__u8>());
+const JSIOCGVERSION: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x01, mem::size_of::<libc::__u32>());
+const JSIOCGAXES: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x11, mem::size_of::<libc::__u8>());
+const JSIOCGBUTTONS: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x12, mem::size_of::<libc::__u8>());
 
 macro_rules! get_buf_req {
     ($m:expr, $n:expr, $l: expr) => (
-        ioc!(env::consts::READ, $m, $n, $l)
+        ioc!(env::READ, $m, $n, $l)
     )
 }
 

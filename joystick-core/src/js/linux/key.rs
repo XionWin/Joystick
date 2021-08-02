@@ -1,4 +1,4 @@
-use crate::def::*;
+use super::super::def::key::*;
 
 /// Event codes for buttons and keys
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

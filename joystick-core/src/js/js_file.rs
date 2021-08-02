@@ -1,7 +1,7 @@
 use std::{fs::File, os::unix::prelude::{AsRawFd, OpenOptionsExt, RawFd}};
-use crate::linux::{axis::Axis, event::Event, key::Key};
+use super::linux::{Axis, Event, Key};
 
-use super::utils;
+use super::js_utils;
 
 bitflags! {
     pub struct OpenMode: u8 {
@@ -84,34 +84,34 @@ impl JsFile {
     }
 
     pub fn read_driver_version(&self) -> Result<u32, &'static str> {
-        utils::read_driver_version(self.fd())
+        js_utils::read_driver_version(self.fd())
     }
     
     pub fn read_axis_count(&self) -> Result<u8, &'static str> {
-        utils::read_axis_count(self.fd())
+        js_utils::read_axis_count(self.fd())
     }
     
     pub fn read_button_count(&self) -> Result<u8, &'static str> {
-        utils::read_button_count(self.fd())
+        js_utils::read_button_count(self.fd())
     }
 
     pub fn read_axis_mapping(&self, size: usize) -> Result<Vec<Axis>, &'static str> {
-        utils::read_axis_mapping(self.fd(), size)
+        js_utils::read_axis_mapping(self.fd(), size)
     }
 
     pub fn read_button_mapping(&self, size: usize) -> Result<Vec<Key>, &'static str> {
-        utils::read_button_mapping(self.fd(), size)
+        js_utils::read_button_mapping(self.fd(), size)
     }
 
     pub fn read_name(&self) -> Result<String, &'static str> {
-        utils::read_name(self.fd())
+        js_utils::read_name(self.fd())
     }
 
     pub fn read_event_with_block(&self) -> Event {
-        utils::read_event_with_block(self.fd())
+        js_utils::read_event_with_block(self.fd())
     }
 
     pub fn read_init_event_with_no_block(&self) -> Vec<Event> {
-        utils::read_init_event_with_no_block(self.fd())
+        js_utils::read_init_event_with_no_block(self.fd())
     }
 }

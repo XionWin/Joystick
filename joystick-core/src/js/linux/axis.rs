@@ -1,4 +1,5 @@
-use crate::def::*;
+
+use super::super::def::abs::*;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[repr(u8)]

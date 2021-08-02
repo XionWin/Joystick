@@ -1,16 +1,15 @@
 #[macro_use]
 extern crate bitflags;
 
-pub(crate) mod def;
-pub mod linux;
-mod js_file;
-pub mod utils;
-
 use std::{os::{unix::prelude::RawFd}};
 
-use linux::{env, ff};
+pub mod js;
+pub mod ff;
 
-pub use js_file::*;
+
+use crate::js::def::env;
+pub use crate::ff::linux::forece_feedback;
+pub use js::js_file::*;
 
 // #define EVIOCGMTSLOTS(len)	_IOC(_IOC_READ, 'E', 0x0a, len)
 
@@ -48,20 +47,20 @@ const FF_RAMP: u16 = 0x57;
 
 
 const EVIOCSFF: env::IoctlNumType = ioc!(
-    env::consts::WRITE,
+    env::WRITE,
     b'E',
     0x80,
-    core::mem::size_of::<ff::FfEffect>()
+    core::mem::size_of::<forece_feedback::FfEffect>()
 );
 const EVIOCRMFF: env::IoctlNumType = ioc!(
-    env::consts::WRITE,
+    env::WRITE,
     b'E',
     0x81,
     core::mem::size_of::<libc::c_int>()
 );
 
 const EVIOCGEFFECTS: env::IoctlNumType = ioc!(
-    env::consts::READ,
+    env::READ,
     b'E',
     0x84,
     core::mem::size_of::<libc::c_int>()
@@ -83,13 +82,13 @@ pub fn test(fd: std::os::unix::prelude::RawFd) {
 
 pub fn upload_periodic_effect(fd: RawFd) -> i16 {
     let effect_type = FF_PERIOD;
-    let mut effect = ff::FfEffect {
+    let mut effect = forece_feedback::FfEffect {
         type_: effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
         replay: Default::default(),
-        effect:  ff::UEffect {
+        effect:  forece_feedback::UEffect {
             periodic: Default::default()
         }
     };
@@ -111,24 +110,24 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
             duration as u16
         };
 
-        let mut effect = ff::FfEffect {
+        let mut effect = forece_feedback::FfEffect {
             type_: effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
-            replay: ff::Replay {
+            replay: forece_feedback::Replay {
                 delay: 0,
                 length: duration,
             },
-            effect: ff::UEffect {
-                periodic: ff::PeriodicEffect {
-                    waveform: ff::WaveForm::FF_SINE,
+            effect: forece_feedback::UEffect {
+                periodic: forece_feedback::PeriodicEffect {
+                    waveform: forece_feedback::WaveForm::FF_SINE,
                     period: 100,	/* 0.1 second */
                     magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
                     offset: 0,
                     phase: 0,
                 
-                    envelope: ff::Envelope {
+                    envelope: forece_feedback::Envelope {
                         attack_length: 1000,
                         attack_level: 0x00ff,
                         fade_length: 1000,
@@ -153,14 +152,14 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
 
 pub fn upload_rumble_effect(fd: RawFd) -> i16 {
     let effect_type = FF_RUMBLE;
-    let mut effect = ff::FfEffect {
+    let mut effect = forece_feedback::FfEffect {
         type_: effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
         replay: Default::default(),
-        effect:  ff::UEffect {
-            rumble: ff::RumbleEffect {
+        effect:  forece_feedback::UEffect {
+            rumble: forece_feedback::RumbleEffect {
                 strong_magnitude: 0,
                 weak_magnitude: 0,
             }
@@ -184,17 +183,17 @@ pub fn upload_rumble_effect(fd: RawFd) -> i16 {
             duration as u16
         };
 
-        let mut effect = ff::FfEffect {
+        let mut effect = forece_feedback::FfEffect {
             type_: effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
-            replay: ff::Replay {
+            replay: forece_feedback::Replay {
                 delay: 0,
                 length: duration,
             },
-            effect: ff::UEffect {
-                rumble: ff::RumbleEffect {
+            effect: forece_feedback::UEffect {
+                rumble: forece_feedback::RumbleEffect {
                     strong_magnitude: 0x8000,
                     weak_magnitude: 0,
                 }
@@ -214,14 +213,14 @@ pub fn run (fd: RawFd, effect_id: i16) {
         tv_sec: 0,
         tv_usec: 0,
     };
-    let ev = ff::InputEvent {
+    let ev = forece_feedback::InputEvent {
         type_: EV_FF,
         code: effect_id as u16,
         value: 10,
         time,
     };
 
-    let size = core::mem::size_of::<ff::InputEvent>();
+    let size = core::mem::size_of::<forece_feedback::InputEvent>();
     let s = unsafe { std::slice::from_raw_parts(&ev as *const _ as *const u8, size) };
 
     unsafe {
@@ -259,14 +258,14 @@ pub fn run (fd: RawFd, effect_id: i16) {
 //         (($sz as env::IoctlNumType & env::SIZEMASK) << env::SIZESHIFT))
 // }
 
-// const JSIOCGVERSION: env::IoctlNumType = ioc!(env::consts::READ, JOYSTICK_MAGIC, 0x01, mem::size_of::<libc::__u32>());
-// const JSIOCGAXES: env::IoctlNumType = ioc!(env::consts::READ, JOYSTICK_MAGIC, 0x11, mem::size_of::<libc::__u8>());
-// const JSIOCGBUTTONS: env::IoctlNumType = ioc!(env::consts::READ, JOYSTICK_MAGIC, 0x12, mem::size_of::<libc::__u8>());
+// const JSIOCGVERSION: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x01, mem::size_of::<libc::__u32>());
+// const JSIOCGAXES: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x11, mem::size_of::<libc::__u8>());
+// const JSIOCGBUTTONS: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x12, mem::size_of::<libc::__u8>());
 
 // #[macro_export]
 // macro_rules! get_buf_req {
 //     ($m:expr, $n:expr, $l: expr) => (
-//         ioc!(env::consts::READ, $m, $n, $l)
+//         ioc!(env::READ, $m, $n, $l)
 //     )
 // }
 

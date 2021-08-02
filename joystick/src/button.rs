@@ -34,7 +34,7 @@ impl super::control::Control for Button {
 }
 
 impl Button {
-    pub fn parse(id: u8, key: &jsc::linux::key::Key) -> Self {
+    pub fn parse(id: u8, key: &jsc::js::linux::Key) -> Self {
         Self {
             id,
             alias: key.to_string(),
