@@ -1,57 +1,17 @@
 use std::{ffi::CStr, os::unix::prelude::RawFd};
 use ::core::{default::Default, mem};
 
-use super::def::env;
+
+use super::super::file::def::env;
 use super::linux::{Key, Axis, Event};
 
+use crate::{ioc, read_number, get_buf_req, read_buf};
+
 const JOYSTICK_MAGIC: libc::c_uchar = b'j';
-
-macro_rules! ioc {
-    ($dir:expr, $ty:expr, $nr:expr, $sz:expr) => (
-        (($dir as env::IoctlNumType & env::DIRMASK) << env::DIRSHIFT) |
-        (($ty as env::IoctlNumType & env::TYPEMASK) << env::TYPESHIFT) |
-        (($nr as env::IoctlNumType & env::NRMASK) << env::NRSHIFT) |
-        (($sz as env::IoctlNumType & env::SIZEMASK) << env::SIZESHIFT))
-}
-
 const JSIOCGVERSION: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x01, mem::size_of::<libc::__u32>());
 const JSIOCGAXES: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x11, mem::size_of::<libc::__u8>());
 const JSIOCGBUTTONS: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x12, mem::size_of::<libc::__u8>());
 
-macro_rules! get_buf_req {
-    ($m:expr, $n:expr, $l: expr) => (
-        ioc!(env::READ, $m, $n, $l)
-    )
-}
-
-const READ_NUM_ERR_MSG: &'static str = "read_number error";
-macro_rules! read_number {
-    ($fd:expr, $req:expr, $t: ty) => {
-        {
-            let mut value: $t = 0;
-            unsafe {
-                match libc::ioctl($fd, $req, &mut value) {
-                    0 => Ok(value),
-                    _ => Err(READ_NUM_ERR_MSG)
-                }
-            }
-        }
-    };
-}
-
-const READ_BUF_ERR_MSG: &'static str = "read_buf error";
-macro_rules! read_buf {
-    ($fd:expr, $req:expr, $buf: expr) => {
-        {
-            unsafe {
-                match libc::ioctl($fd, $req, $buf) {
-                    len if len > 0 => Ok(len),
-                    _ => Err(READ_BUF_ERR_MSG)
-                }
-            }
-        }
-    };
-}
 pub fn read_driver_version(fd: RawFd) -> Result<u32, &'static str> {
     read_number!(fd, JSIOCGVERSION, u32)
 }
