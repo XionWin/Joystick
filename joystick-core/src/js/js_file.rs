@@ -2,6 +2,7 @@ use std::{fs::File, os::unix::prelude::{AsRawFd, OpenOptionsExt, RawFd}};
 use super::linux::{Axis, Event, Key};
 
 use super::js_utils;
+use super::super::file::linux_file;
 
 bitflags! {
     pub struct OpenMode: u8 {
@@ -108,10 +109,10 @@ impl JsFile {
     }
 
     pub fn read_event_with_block(&self) -> Event {
-        js_utils::read_event_with_block(self.fd())
+        linux_file::read_event_with_block(self.fd())
     }
 
     pub fn read_init_event_with_no_block(&self) -> Vec<Event> {
-        js_utils::read_init_event_with_no_block(self.fd())
+        linux_file::read_init_event_with_no_block(self.fd())
     }
 }

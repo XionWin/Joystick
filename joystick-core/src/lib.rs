@@ -5,11 +5,12 @@ mod file;
 mod js;
 mod ff;
 
-pub(crate) use file::{def::*};
+
 pub use js::{linux::*, js_file::*};
 pub use ff::{linux::*, ff_file::*};
 
 use std::{os::{unix::prelude::RawFd}};
+use file::{def::*};
 
 
 // #define EVIOCGMTSLOTS(len)	_IOC(_IOC_READ, 'E', 0x0a, len)

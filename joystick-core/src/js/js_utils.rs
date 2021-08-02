@@ -60,22 +60,3 @@ pub fn read_name(fd: RawFd) -> Result<String, &'static str> {
     }
 }
 
-pub fn read_init_event_with_no_block(fd: RawFd) -> Vec<Event> {
-    let mut events = Vec::<Event>::new();
-    let mut event = Event::default();
-    unsafe {
-        while libc::read(fd, (&mut event as *mut _) as *mut libc::c_void, mem::size_of::<Event>()) > 0 {
-            events.push(event.clone());
-        }
-        libc::close(fd);
-    }
-    events
-}
-
-pub fn read_event_with_block(fd: RawFd) -> Event {
-	let mut buf = Event::default();
-    unsafe {
-        libc::read(fd, (&mut buf as *mut _) as *mut libc::c_void, mem::size_of::<Event>());
-    }
-    buf
-}
