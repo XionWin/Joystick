@@ -57,7 +57,7 @@ pub fn set_effect(fd: RawFd, effect_type: EffectType, effect: UEffect) -> Result
 
 }
 
-pub fn run_effect(fd: RawFd, id: u16) {
+pub fn run_effect(fd: RawFd, id: u16) -> bool {
     let time = libc::timeval {
         tv_sec: 0,
         tv_usec: 0,
@@ -73,7 +73,19 @@ pub fn run_effect(fd: RawFd, id: u16) {
     let s = unsafe { std::slice::from_raw_parts(&ev as *const _ as *const u8, size) };
 
     unsafe {
-        let r = libc::write(fd, (s as *const _) as *const libc::c_void, size);
-        println!("run_effect r: {:?}", r);
+        libc::write(fd, (s as *const _) as *const libc::c_void, size) == 0
+    }
+}
+
+const EVIOCRMFF: env::IoctlNumType = ioc!(
+    env::WRITE,
+    b'E',
+    0x81,
+    core::mem::size_of::<libc::c_int>()
+);
+
+pub fn remove_effect(fd: RawFd, id: u16) -> bool {
+    unsafe {
+        libc::ioctl(fd, EVIOCRMFF, id as libc::c_int) == 0
     }
 }

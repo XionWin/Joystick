@@ -18,9 +18,21 @@ pub fn test(path: &str) {
     
     match file.set_rumble_effect() {
         Ok(id) => {
+
+            let mut counter = 0;
             loop {
                 file.run_effect(id);
-                std::thread::sleep(core::time::Duration::from_secs(2));
+                counter += 1;
+                println!("counter: {}", counter);
+                std::thread::sleep(core::time::Duration::from_secs(1));
+
+                if counter % 3 == 0 {
+                    let rr = file.remove_effect(id);
+                    println!("rr: {:?}", rr);
+                    let r = file.set_rumble_effect();
+
+                    println!("r: {:?}", r);
+                }
             }
         }
         Err(_) => println!("test error")

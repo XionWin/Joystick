@@ -49,8 +49,12 @@ impl FfFile {
     }
 
 
-    pub fn run_effect(&self, id: u16) {
-        ff_utils::run_effect(self.get_fd(), id);
+    pub fn run_effect(&self, id: u16) -> bool {
+        ff_utils::run_effect(self.get_fd(), id)
+    }
+
+    pub fn remove_effect(&self, id: u16) -> bool {
+        ff_utils::remove_effect(self.get_fd(), id)
     }
 
     // pub fn read_driver_version(&self) -> Result<u32, &'static str> {
