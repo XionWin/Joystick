@@ -1,1 +1,3 @@
-pub mod forece_feedback;
+mod forece_feedback;
+
+pub use forece_feedback::*;

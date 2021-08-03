@@ -1,25 +1,25 @@
 extern crate joystick;
 
 fn main() {
-    let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
-    println!("{:?}", &gamepad);
+    // let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
+    // println!("{:?}", &gamepad);
 
-    let read_event = |event: joystick::JsEvent| {
-        println!("{:?}", &event);
-    };
+    // let read_event = |event: joystick::JsEvent| {
+    //     println!("{:?}", &event);
+    // };
 
-    joystick::begin_read!(read_event, &mut gamepad);
+    // joystick::begin_read!(read_event, &mut gamepad);
 
-    // use std::os::unix::prelude::AsRawFd;
-    // let file = std::fs::OpenOptions::new()
-    //     .read(true)
-    //     .write(true)
-    //     // .custom_flags(libc::O_NONBLOCK)
-    //     .open("/dev/input/event2").expect("Error");
+    use std::os::unix::prelude::AsRawFd;
+    let file = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        // .custom_flags(libc::O_NONBLOCK)
+        .open("/dev/input/event2").expect("Error");
 
-    // let fd = file.as_raw_fd();
+    let fd = file.as_raw_fd();
 
-    // joystick::test(fd);
+    joystick::test(fd);
 
     // let file = OpenOptions::new()
     //     .read(true)

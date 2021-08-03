@@ -44,7 +44,7 @@ const EVIOCSFF: env::IoctlNumType = ioc!(
     env::WRITE,
     b'E',
     0x80,
-    core::mem::size_of::<forece_feedback::FfEffect>()
+    core::mem::size_of::<FfEffect>()
 );
 const EVIOCRMFF: env::IoctlNumType = ioc!(
     env::WRITE,
@@ -75,14 +75,14 @@ pub fn test(fd: std::os::unix::prelude::RawFd) {
 }
 
 pub fn upload_periodic_effect(fd: RawFd) -> i16 {
-    let effect_type = forece_feedback::EffectType::Periodic;
-    let mut effect = forece_feedback::FfEffect {
+    let effect_type = EffectType::Periodic;
+    let mut effect = FfEffect {
         effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
         replay: Default::default(),
-        effect:  forece_feedback::UEffect {
+        effect:  UEffect {
             periodic: Default::default()
         }
     };
@@ -104,24 +104,24 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
             duration as u16
         };
 
-        let mut effect = forece_feedback::FfEffect {
+        let mut effect = FfEffect {
             effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
-            replay: forece_feedback::Replay {
+            replay: Replay {
                 delay: 0,
                 length: duration,
             },
-            effect: forece_feedback::UEffect {
-                periodic: forece_feedback::PeriodicEffect {
-                    waveform: forece_feedback::WaveForm::Sine,
+            effect: UEffect {
+                periodic: PeriodicEffect {
+                    waveform: WaveForm::Sine,
                     period: 100,	/* 0.1 second */
                     magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
                     offset: 0,
                     phase: 0,
                 
-                    envelope: forece_feedback::Envelope {
+                    envelope: Envelope {
                         attack_length: 1000,
                         attack_level: 0x00ff,
                         fade_length: 1000,
@@ -145,15 +145,15 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
 }
 
 pub fn upload_rumble_effect(fd: RawFd) -> i16 {
-    let effect_type = forece_feedback::EffectType::Rumble;
-    let mut effect = forece_feedback::FfEffect {
+    let effect_type = EffectType::Rumble;
+    let mut effect = FfEffect {
         effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
         replay: Default::default(),
-        effect:  forece_feedback::UEffect {
-            rumble: forece_feedback::RumbleEffect {
+        effect:  UEffect {
+            rumble: RumbleEffect {
                 strong_magnitude: 0,
                 weak_magnitude: 0,
             }
@@ -177,17 +177,17 @@ pub fn upload_rumble_effect(fd: RawFd) -> i16 {
             duration as u16
         };
 
-        let mut effect = forece_feedback::FfEffect {
+        let mut effect = FfEffect {
             effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
-            replay: forece_feedback::Replay {
+            replay: Replay {
                 delay: 0,
                 length: duration,
             },
-            effect: forece_feedback::UEffect {
-                rumble: forece_feedback::RumbleEffect {
+            effect: UEffect {
+                rumble: RumbleEffect {
                     strong_magnitude: 0x8000,
                     weak_magnitude: 0,
                 }
@@ -207,14 +207,14 @@ pub fn run (fd: RawFd, effect_id: i16) {
         tv_sec: 0,
         tv_usec: 0,
     };
-    let ev = forece_feedback::InputEvent {
+    let ev = InputEvent {
         type_: ff::def::EV_FF,
         code: effect_id as u16,
         value: 10,
         time,
     };
 
-    let size = core::mem::size_of::<forece_feedback::InputEvent>();
+    let size = core::mem::size_of::<InputEvent>();
     let s = unsafe { std::slice::from_raw_parts(&ev as *const _ as *const u8, size) };
 
     unsafe {
