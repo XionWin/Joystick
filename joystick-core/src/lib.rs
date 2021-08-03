@@ -208,8 +208,8 @@ pub fn run (fd: RawFd, effect_id: i16) {
         tv_usec: 0,
     };
     let ev = InputEvent {
-        type_: ff::def::EV_FF,
-        code: effect_id as u16,
+        event_type: LinuxEventType::ForceFeedback,
+        id: effect_id as u16,
         value: 10,
         time,
     };

@@ -1,6 +1,8 @@
 use std::os::unix::prelude::RawFd;
 
-use crate::file::linux_file::{OpenMode, LinuxFile};
+use crate::{InputEvent, RumbleEffect, UEffect, file::linux_file::{OpenMode, LinuxFile}};
+
+use super::ff_utils;
 
 
 #[derive(Debug)]
@@ -34,6 +36,21 @@ impl FfFile {
 
     pub fn switch(self, mode: OpenMode) {
         self.file.switch(mode);
+    }
+
+    pub fn set_rumble_effect(&self) -> Result<u16, &'static str> {
+        let effect = UEffect {
+            rumble: RumbleEffect {
+                strong_magnitude: 0x8000,
+                weak_magnitude: 0,
+            }
+        };
+        ff_utils::set_effect(self.get_fd(), crate::EffectType::Rumble, effect)
+    }
+
+
+    pub fn run_effect(&self, id: u16) {
+        ff_utils::run_effect(self.get_fd(), id);
     }
 
     // pub fn read_driver_version(&self) -> Result<u32, &'static str> {

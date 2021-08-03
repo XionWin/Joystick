@@ -1,5 +1,18 @@
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[repr(u16)]
+pub enum LinuxEventType {
+    Sync = 0x00,
+    Key = 0x01,
+    RelativeCoordinates = 0x02,
+    AbsoluteCoordinates = 0x03,
+    MSC = 0x04,
+    LED = 0x11,
+    Autorepeating = 0x14,
+    ForceFeedback = 0x15
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[repr(u16)]
 pub enum EffectType {
     Rumble = 0x50,
     Periodic = 0x51,
@@ -119,8 +132,8 @@ impl Default for PeriodicEffect {
 #[repr(C)]
 pub struct InputEvent {
     pub time: libc::timeval,
-    pub type_: u16,
-    pub code: u16,
+    pub event_type: LinuxEventType,
+    pub id: u16,
     pub value: i32,
 }
 
