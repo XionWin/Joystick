@@ -1,6 +1,6 @@
 use std::os::unix::prelude::RawFd;
 
-use crate::{InputEvent, RumbleEffect, UEffect, file::linux_file::{OpenMode, LinuxFile}};
+use crate::{RumbleEffect, UEffect, file::linux_file::{OpenMode, LinuxFile}};
 
 use super::ff_utils;
 
