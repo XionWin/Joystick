@@ -1,3 +1,16 @@
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[repr(u16)]
+pub enum EffectType {
+    Rumble = 0x50,
+    Periodic = 0x51,
+    Constant = 0x52,
+    Spring = 0x53,
+    Fiction = 0x54,
+    Damper = 0x55,
+    Inertia = 0x56,
+    Ramp = 0x57,
+}
+
 #[derive(Copy, Clone, Default)]
 #[repr(C)]
 pub struct Trigger {
@@ -15,12 +28,11 @@ pub struct Replay {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct FfEffect {
-    pub type_: u16,
+    pub effect_type: EffectType,
     pub id: i16,
     pub direction: u16,
     pub trigger: Trigger,
     pub replay: Replay,
-    // FIXME this is actually a union
     pub effect: UEffect
 }
 
@@ -29,6 +41,7 @@ pub struct FfEffect {
 pub union UEffect {
     pub periodic: PeriodicEffect,
     pub rumble: RumbleEffect
+    // there will be some other effects.
 }
 
 
@@ -59,18 +72,15 @@ impl Default for Envelope {
     }
 }
 
-#[allow(dead_code, non_camel_case_types)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[repr(u16)]
 pub enum WaveForm {
-    FF_SQUARE = 0x58,
-    FF_TRIANG = 0x59,
-    FF_SINE = 0x5a,
-    FF_SAW_UP = 0x5b,
-    FF_SAW_DO = 0x5c,
-    FF_CUSTOM = 0x5d,
-    FF_GAIN = 0x60,
-    FF_AUTOCE = 0x61,
+    Square = 0x58,
+    Triangle = 0x59,
+    Sine = 0x5a,
+    SawUp = 0x5b,
+    SawDown = 0x5c,
+    Custom = 0x5d
 }
 
 #[derive(Copy, Clone)]
@@ -91,7 +101,7 @@ pub struct PeriodicEffect {
 impl Default for PeriodicEffect {
     fn default() -> Self {
         Self {
-            waveform: WaveForm::FF_SINE,
+            waveform: WaveForm::Sine,
             period: 0,
             magnitude: 0,
             offset: 0,

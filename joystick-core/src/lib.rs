@@ -38,15 +38,6 @@ macro_rules! ioc {
     };
 }
 
-const EV_FF: u16 = 0x15;
-const FF_RUMBLE: u16 = 0x50;
-const FF_PERIOD: u16 = 0x51;
-const FF_CONSTA: u16 = 0x52;
-const FF_SPRING: u16 = 0x53;
-const FF_FRICTI: u16 = 0x54;
-const FF_DAMPER: u16 = 0x55;
-const FF_INERTI: u16 = 0x56;
-const FF_RAMP: u16 = 0x57;
 
 
 const EVIOCSFF: env::IoctlNumType = ioc!(
@@ -84,9 +75,9 @@ pub fn test(fd: std::os::unix::prelude::RawFd) {
 }
 
 pub fn upload_periodic_effect(fd: RawFd) -> i16 {
-    let effect_type = FF_PERIOD;
+    let effect_type = forece_feedback::EffectType::Periodic;
     let mut effect = forece_feedback::FfEffect {
-        type_: effect_type,
+        effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
@@ -114,7 +105,7 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
         };
 
         let mut effect = forece_feedback::FfEffect {
-            type_: effect_type,
+            effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
@@ -124,7 +115,7 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
             },
             effect: forece_feedback::UEffect {
                 periodic: forece_feedback::PeriodicEffect {
-                    waveform: forece_feedback::WaveForm::FF_SINE,
+                    waveform: forece_feedback::WaveForm::Sine,
                     period: 100,	/* 0.1 second */
                     magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
                     offset: 0,
@@ -154,9 +145,9 @@ pub fn upload_periodic_effect(fd: RawFd) -> i16 {
 }
 
 pub fn upload_rumble_effect(fd: RawFd) -> i16 {
-    let effect_type = FF_RUMBLE;
+    let effect_type = forece_feedback::EffectType::Rumble;
     let mut effect = forece_feedback::FfEffect {
-        type_: effect_type,
+        effect_type,
         id: -1,
         direction: 0,
         trigger: Default::default(),
@@ -187,7 +178,7 @@ pub fn upload_rumble_effect(fd: RawFd) -> i16 {
         };
 
         let mut effect = forece_feedback::FfEffect {
-            type_: effect_type,
+            effect_type,
             id: effect_id,
             direction: 0,
             trigger: Default::default(),
@@ -217,7 +208,7 @@ pub fn run (fd: RawFd, effect_id: i16) {
         tv_usec: 0,
     };
     let ev = forece_feedback::InputEvent {
-        type_: EV_FF,
+        type_: ff::def::EV_FF,
         code: effect_id as u16,
         value: 10,
         time,
