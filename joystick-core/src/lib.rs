@@ -10,9 +10,6 @@ pub use js::{linux::*, js_file::*};
 pub use ff::{linux::*, ff_file::*};
 pub use file::OpenMode;
 
-use std::{os::{unix::prelude::RawFd}};
-use file::{def::*};
-
 
 // #define EVIOCGMTSLOTS(len)	_IOC(_IOC_READ, 'E', 0x0a, len)
 
@@ -29,201 +26,27 @@ use file::{def::*};
 // #define EVIOCGRAB		_IOW('E', 0x90, int)			/* Grab/Release device */
 // #define EVIOCREVOKE		_IOW('E', 0x91, int)			/* Revoke device access */
 
-macro_rules! ioc {
-    ($dir:expr, $ty:expr, $nr:expr, $sz:expr) => {
-        (($dir as env::IoctlNumType & env::DIRMASK) << env::DIRSHIFT)
-            | (($ty as env::IoctlNumType & env::TYPEMASK) << env::TYPESHIFT)
-            | (($nr as env::IoctlNumType & env::NRMASK) << env::NRSHIFT)
-            | (($sz as env::IoctlNumType & env::SIZEMASK) << env::SIZESHIFT)
-    };
-}
 
 
+// const EVIOCSFF: env::IoctlNumType = ioc!(
+//     env::WRITE,
+//     b'E',
+//     0x80,
+//     core::mem::size_of::<FfEffect>()
+// );
+// const EVIOCRMFF: env::IoctlNumType = ioc!(
+//     env::WRITE,
+//     b'E',
+//     0x81,
+//     core::mem::size_of::<libc::c_int>()
+// );
 
-const EVIOCSFF: env::IoctlNumType = ioc!(
-    env::WRITE,
-    b'E',
-    0x80,
-    core::mem::size_of::<FfEffect>()
-);
-const EVIOCRMFF: env::IoctlNumType = ioc!(
-    env::WRITE,
-    b'E',
-    0x81,
-    core::mem::size_of::<libc::c_int>()
-);
-
-const EVIOCGEFFECTS: env::IoctlNumType = ioc!(
-    env::READ,
-    b'E',
-    0x84,
-    core::mem::size_of::<libc::c_int>()
-);
-
-pub fn test(fd: std::os::unix::prelude::RawFd) {
-    // let effect_types = vec![FF_PERIOD, FF_CONSTA, FF_RUMBLE, FF_SPRING, FF_FRICTI,
-    //     FF_DAMPER, FF_INERTI, FF_RAMP, FF_SQUARE, FF_TRIANG,
-    //     FF_SINE, FF_SAW_UP, FF_SAW_DO, FF_CUSTOM, FF_GAIN, FF_AUTOCE];
-
-    let effect_ids = vec![upload_periodic_effect(fd), upload_rumble_effect(fd)];
-    
-    loop {
-        for effect_id in &effect_ids {
-            run(fd, *effect_id);
-        }
-    }
-}
-
-pub fn upload_periodic_effect(fd: RawFd) -> i16 {
-    let effect_type = EffectType::Periodic;
-    let mut effect = FfEffect {
-        effect_type,
-        id: -1,
-        direction: 0,
-        trigger: Default::default(),
-        replay: Default::default(),
-        effect:  UEffect {
-            periodic: Default::default()
-        }
-    };
-
-    let result: i32;
-    let effect_id: i16;
-    unsafe {
-        result = libc::ioctl(fd, EVIOCSFF, &mut effect);
-        effect_id = effect.id;
-        println!("upload id: {}, result: {:?}", effect_id, result);
-    }
-
-    if result == 0 {
-        let min_duration = core::time::Duration::from_millis(20);
-        let duration = min_duration.as_secs() * 1000 + u64::from(min_duration.subsec_millis());
-        let duration = if duration > u64::from(u16::MAX) {
-            u16::MAX
-        } else {
-            duration as u16
-        };
-
-        let mut effect = FfEffect {
-            effect_type,
-            id: effect_id,
-            direction: 0,
-            trigger: Default::default(),
-            replay: Replay {
-                delay: 0,
-                length: duration,
-            },
-            effect: UEffect {
-                periodic: PeriodicEffect {
-                    waveform: WaveForm::Sine,
-                    period: 100,	/* 0.1 second */
-                    magnitude: 0x7fff,	/* 0.5 * Maximum magnitude */
-                    offset: 0,
-                    phase: 0,
-                
-                    envelope: Envelope {
-                        attack_length: 1000,
-                        attack_level: 0x00ff,
-                        fade_length: 1000,
-                        fade_level: 0x00ff,
-                    },
-                
-                    custom_len: 0,
-                    custom_data: unsafe {
-                        core::mem::zeroed()
-                    },
-                }
-            }
-        };
-
-        unsafe {
-            let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
-            println!("{:?}", r);
-        }
-    }
-    effect_id
-}
-
-pub fn upload_rumble_effect(fd: RawFd) -> i16 {
-    let effect_type = EffectType::Rumble;
-    let mut effect = FfEffect {
-        effect_type,
-        id: -1,
-        direction: 0,
-        trigger: Default::default(),
-        replay: Default::default(),
-        effect:  UEffect {
-            rumble: RumbleEffect {
-                strong_magnitude: 0,
-                weak_magnitude: 0,
-            }
-        },
-    };
-
-    let result: i32;
-    let effect_id: i16;
-    unsafe {
-        result = libc::ioctl(fd, EVIOCSFF, &mut effect);
-        effect_id = effect.id;
-        println!("upload id: {}, result: {:?}", effect_id, result);
-    }
-
-    if result == 0 {
-        let min_duration = core::time::Duration::from_millis(20);
-        let duration = min_duration.as_secs() * 1000 + u64::from(min_duration.subsec_millis());
-        let duration = if duration > u64::from(u16::MAX) {
-            u16::MAX
-        } else {
-            duration as u16
-        };
-
-        let mut effect = FfEffect {
-            effect_type,
-            id: effect_id,
-            direction: 0,
-            trigger: Default::default(),
-            replay: Replay {
-                delay: 0,
-                length: duration,
-            },
-            effect: UEffect {
-                rumble: RumbleEffect {
-                    strong_magnitude: 0x8000,
-                    weak_magnitude: 0,
-                }
-            },
-        };
-
-        unsafe {
-            let r = libc::ioctl(fd, EVIOCSFF, &mut effect);
-            println!("{:?}", r);
-        }
-    }
-    effect_id
-}
-
-pub fn run (fd: RawFd, effect_id: i16) {
-    let time = libc::timeval {
-        tv_sec: 0,
-        tv_usec: 0,
-    };
-    let ev = InputEvent {
-        event_type: LinuxEventType::ForceFeedback,
-        id: effect_id as u16,
-        value: 10,
-        time,
-    };
-
-    let size = core::mem::size_of::<InputEvent>();
-    let s = unsafe { std::slice::from_raw_parts(&ev as *const _ as *const u8, size) };
-
-    unsafe {
-        let r = libc::write(fd, (s as *const _) as *const libc::c_void, size);
-        println!("{:?}", r);
-    }
-    std::thread::sleep(core::time::Duration::from_secs(2));
-}
-
+// const EVIOCGEFFECTS: env::IoctlNumType = ioc!(
+//     env::READ,
+//     b'E',
+//     0x84,
+//     core::mem::size_of::<libc::c_int>()
+// );
 
 
 // use std::{ffi::CStr, os::unix::prelude::RawFd};
