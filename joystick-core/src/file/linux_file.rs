@@ -32,6 +32,20 @@ macro_rules! read_number {
 }
 
 #[macro_export]
+macro_rules! write_number {
+    ($fd:expr, $req:expr, $v: expr) => {
+        {
+            unsafe {
+                match libc::ioctl($fd, $req, $v) {
+                    0 => true,
+                    _ => false
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! read_buf {
     ($fd:expr, $req:expr, $buf: expr) => {
         {

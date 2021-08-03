@@ -10,14 +10,6 @@ fn main() {
 
     // joystick::begin_read!(read_event, &mut gamepad);
 
-    // use std::os::unix::prelude::AsRawFd;
-    // let file = std::fs::OpenOptions::new()
-    //     .read(true)
-    //     .write(true)
-    //     // .custom_flags(libc::O_NONBLOCK)
-    //     .open("/dev/input/event2").expect("Error");
-
-    // let fd = file.as_raw_fd();
 
     joystick::test("/dev/input/event2");
 

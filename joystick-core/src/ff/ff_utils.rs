@@ -1,6 +1,6 @@
 use std::os::unix::prelude::RawFd;
 
-use crate::{EffectType, FfEffect, InputEvent, LinuxEventType, Replay, UEffect, file::def::env, ioc};
+use crate::{EffectType, FfEffect, InputEvent, LinuxEventType, Replay, UEffect, file::def::env, ioc, write_number};
 
 const EVIOCSFF: env::IoctlNumType = ioc!(
     env::WRITE,
@@ -85,7 +85,5 @@ const EVIOCRMFF: env::IoctlNumType = ioc!(
 );
 
 pub fn remove_effect(fd: RawFd, id: u16) -> bool {
-    unsafe {
-        libc::ioctl(fd, EVIOCRMFF, id as libc::c_int) == 0
-    }
+    write_number!(fd, EVIOCRMFF, id as libc::c_int)
 }
