@@ -1,64 +1,40 @@
-use std::{fs::File, os::unix::prelude::{AsRawFd, RawFd}};
+use std::os::unix::prelude::RawFd;
+
+use crate::file::linux_file::{OpenMode, LinuxFile};
 
 
 #[derive(Debug)]
 pub struct FfFile {
-    path: String,
-    file: Option<File>
+    file: LinuxFile
 }
 
 impl FfFile {
     pub fn new(path: &str) -> Self  {
         FfFile {
-            path: String::from(path),
-            file: Option::None
+            file: LinuxFile::new(path)
         }
     }
 
     pub fn get_fd(&self) -> RawFd {
-        match &self.file {
-            Some(f) => f.as_raw_fd(),
-            None => -1
-        }
+        self.file.get_fd()
     }
 
     pub fn is_connected(&self) -> bool {
-        match self.file {
-            Some(_) => true,
-            None => false
-        }
+        self.file.is_connected()
     }
     
-    // pub fn open(mut self, mode: OpenMode) -> Self {
-    //     let mut file_options = std::fs::OpenOptions::new();
+    pub fn open(mut self, mode: OpenMode) -> Self {
+        self.file = self.file.open(mode);
+        self
+    }
 
-    //     file_options
-    //         .read(mode & OpenMode::READ == OpenMode::READ)
-    //         .write(mode & OpenMode::WRITE == OpenMode::WRITE);
-    //     if mode & OpenMode::NONBLOCK == OpenMode::NONBLOCK {
-    //         file_options.custom_flags(libc::O_NONBLOCK);
-    //     }
+    pub fn close(&mut self) {
+        self.file.close();
+    }
 
-    //     self.file = file_options.open(&self.path).ok();
-    //     self
-    // }
-
-    // pub fn close(&mut self) {
-    //     unsafe {
-    //         libc::close(self.fd());
-    //         self.file = Option::None
-    //     }
-    // }
-
-    // pub fn switch(mut self, mode: OpenMode) {
-    //     match &self.file {
-    //         Some(_) => {
-    //             self.close();
-    //         }
-    //         None => {}
-    //     }
-    //     self.open(mode);
-    // }
+    pub fn switch(self, mode: OpenMode) {
+        self.file.switch(mode);
+    }
 
     // pub fn read_driver_version(&self) -> Result<u32, &'static str> {
     //     js_utils::read_driver_version(self.fd())
