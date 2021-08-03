@@ -10,7 +10,7 @@ Joystick reader for raspberry pi written by rust, play with the file
 
 2. Axis Event
 
-3. Force feedback `(developing)`
+3. Force feedback
 
 4. Battery capacity `(developing)`
 
