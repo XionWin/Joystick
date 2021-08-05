@@ -31,7 +31,7 @@ pub fn update_with_events(gamepad: &mut Gamepad, event: jsc::Event) -> JsEvent {
 }
 
 fn update_button(gamepad: &mut Gamepad, event: jsc::Event) -> JsEvent {
-    let button = gamepad.buttons.index_mut(event.number as usize);
+    let button = gamepad.get_buttons().index_mut(event.number as usize);
     button.set_value(event.value);
     JsEvent::new(
         match event.type_ {
@@ -46,7 +46,7 @@ fn update_button(gamepad: &mut Gamepad, event: jsc::Event) -> JsEvent {
 }
 
 fn update_axis(gamepad: &mut Gamepad, event: jsc::Event) -> JsEvent {
-    let axis = gamepad.axes.index_mut(event.number as usize);
+    let axis = gamepad.get_axes().index_mut(event.number as usize);
     axis.set_value(event.value);
     JsEvent::new(
         match event.type_ {

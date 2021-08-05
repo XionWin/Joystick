@@ -2,7 +2,8 @@ use crate::JsEvent;
 
 use super::{axis::Axis, button::Button, utils};
 use joystick_core as jsc;
-use jsc::{JsFile, OpenMode};
+use jsc::{FfFile, JsFile, OpenMode};
+use crate::TForceFeedback;
 
 #[derive(Debug)]
 pub struct Gamepad {
@@ -13,8 +14,10 @@ pub struct Gamepad {
     version: u32,
     name: String,
 
-    pub(crate) buttons: Vec<Button>,
-    pub(crate)axes: Vec<Axis>,
+    buttons: Vec<Button>,
+    axes: Vec<Axis>,
+
+    ff_file: Option<FfFile>
 }
 
 impl Default for Gamepad {
@@ -27,6 +30,7 @@ impl Default for Gamepad {
             name: String::from(""),
             buttons: Vec::<Button>::new(),
             axes: Vec::<Axis>::new(),
+            ff_file: Option::None
         }
     }
 }
@@ -107,13 +111,58 @@ impl Gamepad {
         self.name.clone()
     }
 
-    pub fn get_axes(&self) -> &Vec<Axis> {
-        &self.axes
+    pub fn get_axes(&mut self) -> &mut Vec<Axis> {
+        &mut self.axes
     }
 
-    pub fn get_buttons(&self) -> &Vec<Button> {
-        &self.buttons
+    pub fn get_buttons(&mut self) -> &mut Vec<Button> {
+        &mut self.buttons
     }
+}
+
+
+impl TForceFeedback for Gamepad {
+    type Item = Gamepad;
+
+    fn register_force_feedback(&mut self, path: &str) {
+        self.ff_file = Some (
+            joystick_core::FfFile::new(path).open(joystick_core::OpenMode::READ | joystick_core::OpenMode::WRITE)
+        );
+    }
+
+    fn set_rumble_effect(&self) -> Result<u16, &'static str> {
+        match &self.ff_file {
+            Some(file) => {
+                match file.set_rumble_effect() {
+                    Ok(id) => {
+                        Ok(id)
+                    }
+                    Err(_) => Err("set_rumble_effect error")
+                }
+            },
+            None => Err("force feedback file is null")
+        }
+    }
+
+    fn run_effect(&self, id: u16) -> bool {
+        match &self.ff_file {
+            Some(file) => {
+                file.run_effect(id)
+            },
+            None => false
+        }
+    }
+
+    fn remove_effect(&self, id: u16) -> bool {
+        match &self.ff_file {
+            Some(file) => {
+                file.remove_effect(id)
+            },
+            None => false
+        }
+    }
+
+
 }
 
 
@@ -125,6 +174,7 @@ macro_rules! begin_read {
             let js_event = $gamepad.update();
             // println!("{:?}", $gamepad);
             $name(
+                $gamepad,
                 js_event
             );
         }

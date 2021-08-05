@@ -1,16 +1,43 @@
 extern crate joystick;
 
+use joystick::TForceFeedback;
+
 fn main() {
     let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
 
-    let force_feedback = joystick::ForceFeedback::new("/dev/input/event2");
+    gamepad.register_force_feedback("/dev/input/event2");
     println!("{:?}", &gamepad);
 
-    let ff_id = force_feedback.set_rumble_effect().unwrap();
-    let read_event = |event: joystick::JsEvent| {
+    let mut ff_id = Option::<u16>::None;
+    let mut read_event = |gamepad: &mut joystick::Gamepad, event: joystick::JsEvent| {
         println!("{:?}", &event);
-        if event.get_event_type() == joystick::EventType::Button && event.get_id() == 0 {
-            force_feedback.run_effect(ff_id);
+
+        if event.get_event_type() == joystick::EventType::Button && event.get_alias() == "ButtonWest" && event.get_value() == 1 {
+            match ff_id {
+                Some(id) => println!("Error: id has value, value is {}", id),
+                None => ff_id = Some(gamepad.set_rumble_effect().unwrap())
+            }
+        }
+
+
+        if event.get_event_type() == joystick::EventType::Button && event.get_alias() == "ButtonEast" && event.get_value() == 1 {
+            match ff_id {
+                Some(id) => {
+                    gamepad.remove_effect(id);
+                    ff_id = Option::None;
+                },
+                None => println!("Error: id has no value")
+            }
+        }
+
+
+        if event.get_event_type() == joystick::EventType::Button && event.get_alias() == "ButtonSouth" && event.get_value() == 1 {
+            match ff_id {
+                Some(id) => {
+                    gamepad.run_effect(id);
+                },
+                None => println!("Error: id has no value")
+            }
         }
     };
 

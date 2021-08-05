@@ -7,9 +7,16 @@ mod button;
 mod gamepad;
 mod utils;
 mod js_event;
-mod ff;
+
+mod t_ff;
+mod t_gamepad;
 
 pub use gamepad::*;
 pub use js_event::*;
-pub use ff::*;
+
+
+pub use t_ff::*;
+pub use t_gamepad::*;
+
+
 

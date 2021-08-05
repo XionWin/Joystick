@@ -33,6 +33,13 @@ impl JsEvent {
     pub fn get_id(&self) -> u8 {
         self.id
     }
+
+    pub fn get_alias(&self) -> String {
+        self.alias.clone()
+    }
+    pub fn get_value(&self) -> i16 {
+        self.value
+    }
 }
 
 impl Default for JsEvent {
