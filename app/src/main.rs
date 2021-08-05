@@ -1,17 +1,21 @@
 extern crate joystick;
 
 fn main() {
-    // let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
-    // println!("{:?}", &gamepad);
+    let mut gamepad = joystick::Gamepad::new("/dev/input/js0");
 
-    // let read_event = |event: joystick::JsEvent| {
-    //     println!("{:?}", &event);
-    // };
+    let force_feedback = joystick::ForceFeedback::new("/dev/input/event2");
+    println!("{:?}", &gamepad);
 
-    // joystick::begin_read!(read_event, &mut gamepad);
+    let ff_id = force_feedback.set_rumble_effect().unwrap();
+    let read_event = |event: joystick::JsEvent| {
+        println!("{:?}", &event);
+        if event.get_event_type() == joystick::EventType::Button && event.get_id() == 0 {
+            force_feedback.run_effect(ff_id);
+        }
+    };
 
+    joystick::begin_read!(read_event, &mut gamepad);
 
-    joystick::test("/dev/input/event2");
 
     // let file = OpenOptions::new()
     //     .read(true)

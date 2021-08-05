@@ -1,6 +1,6 @@
 
 
-#[derive(Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum EventType {
     Unknown = 0b0000,
     Button = 0b0001,
@@ -25,6 +25,13 @@ impl JsEvent {
             alias: String::from(alias),
             value
         }
+    }
+
+    pub fn get_event_type(&self) -> EventType {
+        self.event_type
+    }
+    pub fn get_id(&self) -> u8 {
+        self.id
     }
 }
 
