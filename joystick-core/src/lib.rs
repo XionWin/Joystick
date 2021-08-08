@@ -1,14 +1,14 @@
-#[macro_use]
-extern crate bitflags;
+extern crate nix;
 
-mod file;
+
 mod js;
 mod ff;
 
 
+pub use nix::io::def::OpenMode;
 pub use js::{linux::*, js_file::*};
 pub use ff::{linux::*, ff_file::*};
-pub use file::OpenMode;
+
 
 
 // #define EVIOCGMTSLOTS(len)	_IOC(_IOC_READ, 'E', 0x0a, len)

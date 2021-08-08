@@ -1,19 +1,21 @@
 use std::os::unix::prelude::RawFd;
 
-use crate::{RumbleEffect, UEffect, file::linux_file::{OpenMode, LinuxFile}};
+use nix::io::{def::OpenMode, File};
+
+use crate::{RumbleEffect, UEffect};
 
 use super::ff_utils;
 
 
 #[derive(Debug)]
 pub struct FfFile {
-    file: LinuxFile
+    file: File
 }
 
 impl FfFile {
     pub fn new(path: &str) -> Self  {
         FfFile {
-            file: LinuxFile::new(path)
+            file: File::new(path)
         }
     }
 

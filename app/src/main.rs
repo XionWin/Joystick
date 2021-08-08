@@ -19,7 +19,6 @@ fn main() {
             }
         }
 
-
         if event.get_event_type() == joystick::EventType::Button && event.get_alias() == "ButtonEast" && event.get_value() == 1 {
             match ff_id {
                 Some(id) => {

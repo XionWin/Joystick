@@ -3,17 +3,17 @@ use std::{os::unix::prelude::RawFd};
 use super::linux::{Axis, Event, Key};
 
 use super::js_utils;
-use super::super::file::linux_file::{OpenMode, LinuxFile};
+use nix::io::{def::OpenMode, File};
 
 #[derive(Debug)]
 pub struct JsFile {
-    file: LinuxFile
+    file: File
 }
 
 impl JsFile {
     pub fn new(path: &str) -> Self  {
         JsFile {
-            file: LinuxFile::new(path)
+            file: File::new(path)
         }
     }
 
@@ -63,10 +63,10 @@ impl JsFile {
     }
 
     pub fn read_event_with_block(&self) -> Event {
-        self.file.read_event_with_block()
+        self.file.read_with_block()
     }
 
     pub fn read_init_event_with_no_block(&self) -> Vec<Event> {
-        self.file.read_init_event_with_no_block()
+        self.file.read_with_no_block()
     }
 }

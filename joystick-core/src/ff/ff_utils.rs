@@ -1,9 +1,13 @@
 use std::os::unix::prelude::RawFd;
 
-use crate::{EffectType, FfEffect, InputEvent, LinuxEventType, Replay, UEffect, file::def::env, ioc, write_number};
+use crate::{EffectType, FfEffect, InputEvent, LinuxEventType, Replay, UEffect};
 
-const EVIOCSFF: env::IoctlNumType = ioc!(
-    env::WRITE,
+use nix::io::def;
+
+use nix::{ioc, write_number};
+
+const EVIOCSFF: def::IoctlNumType = ioc!(
+    def::WRITE,
     b'E',
     0x80,
     core::mem::size_of::<FfEffect>()
@@ -77,8 +81,8 @@ pub fn run_effect(fd: RawFd, id: u16) -> bool {
     }
 }
 
-const EVIOCRMFF: env::IoctlNumType = ioc!(
-    env::WRITE,
+const EVIOCRMFF: def::IoctlNumType = ioc!(
+    def::WRITE,
     b'E',
     0x81,
     core::mem::size_of::<libc::c_int>()

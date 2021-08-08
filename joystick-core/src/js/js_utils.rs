@@ -2,15 +2,15 @@ use std::{ffi::CStr, os::unix::prelude::RawFd};
 use ::core::{default::Default, mem};
 
 
-use super::super::file::def::env;
+use nix::io::def;
 use super::linux::{Key, Axis};
 
-use crate::{ioc, read_number, get_buf_req, read_buf};
+use nix::{ioc, read_number, get_buf_req, read_buf};
 
 const JOYSTICK_MAGIC: libc::c_uchar = b'j';
-const JSIOCGVERSION: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x01, mem::size_of::<libc::__u32>());
-const JSIOCGAXES: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x11, mem::size_of::<libc::__u8>());
-const JSIOCGBUTTONS: env::IoctlNumType = ioc!(env::READ, JOYSTICK_MAGIC, 0x12, mem::size_of::<libc::__u8>());
+const JSIOCGVERSION: def::IoctlNumType = ioc!(def::READ, JOYSTICK_MAGIC, 0x01, mem::size_of::<libc::__u32>());
+const JSIOCGAXES: def::IoctlNumType = ioc!(def::READ, JOYSTICK_MAGIC, 0x11, mem::size_of::<libc::__u8>());
+const JSIOCGBUTTONS: def::IoctlNumType = ioc!(def::READ, JOYSTICK_MAGIC, 0x12, mem::size_of::<libc::__u8>());
 
 pub fn read_driver_version(fd: RawFd) -> Result<u32, &'static str> {
     read_number!(fd, JSIOCGVERSION, u32)
