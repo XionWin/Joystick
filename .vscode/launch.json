@@ -24,7 +24,7 @@
             //     }
             // ],
             "preLaunchTask": "build file",
-            "miDebuggerPath": "/usr/local/bin/arm-none-eabi-gdb"
+            "miDebuggerPath": "/usr/bin/arm-none-eabi-gdb"
         }
 
 
