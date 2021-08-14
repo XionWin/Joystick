@@ -1,5 +1,5 @@
 #[doc(hidden)]
-pub type IoctlNumType = ::libc::c_int;
+pub type IoctlNumType = ::libc::c_ulong;
 
 #[doc(hidden)]
 pub const NONE: u8 = 0;

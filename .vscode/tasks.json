@@ -33,7 +33,7 @@
             "label": "copy",
             "command": "scp",
             "args": [
-                "${workspaceRoot}/target/arm-unknown-linux-musleabi/debug/app",
+                "${workspaceRoot}/target/arm-unknown-linux-gnueabihf/debug/app",
                 "pi@192.168.0.202:/home/pi/Documents"
             ],
             "dependsOn": "kill"
@@ -57,10 +57,10 @@
             "type": "shell",
             "label": "build",
             "command": "cargo",
-            "options": {"env": {"PATH": "/Users/xion/.musl/arm-linux-musleabi-cross/bin:${env:PATH}"}},
+            // "options": {"env": {"PATH": "/Users/xion/.musl/arm-linux-musleabi-cross/bin:${env:PATH}"}},
             "args": [
                 "build",
-                // "--target=arm-unknown-linux-musleabi"
+                // "--target=arm-unknown-linux-gnueabihf"
             ]
         },
     ]
